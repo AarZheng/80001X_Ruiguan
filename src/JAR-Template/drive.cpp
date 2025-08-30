@@ -321,6 +321,9 @@ void Drive::drive_distance(float distance, float heading, float drive_max_voltag
     drive_with_voltage(drive_output+heading_output, drive_output-heading_output);
     task::sleep(10);
   }
+
+  chassis.DriveL.stop();
+  chassis.DriveR.stop();
 }
 
 /**
@@ -688,9 +691,24 @@ void Drive::holonomic_drive_to_pose(float X_position, float Y_position, float an
  * Default deadband is 5.
  */
 
+// void Drive::control_arcade(){
+//   float throttle = deadband(controller(primary).Axis3.value(), 5);
+//   float turn = deadband(controller(primary).Axis1.value(), 5);
+
+//   // turn = turn * fabs(turn) * 90;
+
+//   DriveL.spin(fwd, to_volt(throttle+turn), volt);
+//   DriveR.spin(fwd, to_volt(throttle-turn), volt);
+// }
+
+float Pilons(float input){
+  float t = 3;
+  return(exp((fabs(input)-100)*(t)/1000)*input);
+}
+
 void Drive::control_arcade(){
-  float throttle = deadband(controller(primary).Axis3.value(), 5);
-  float turn = deadband(controller(primary).Axis1.value(), 5);
+  float throttle = deadband((controller(primary).Axis3.value()), 5);
+  float turn = deadband(Pilons(controller(primary).Axis1.value()), 5);
   DriveL.spin(fwd, to_volt(throttle+turn), volt);
   DriveR.spin(fwd, to_volt(throttle-turn), volt);
 }

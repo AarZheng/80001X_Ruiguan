@@ -1,3 +1,13 @@
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Motor5               motor         5               
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Motor1               motor         1               
+// ---- END VEXCODE CONFIGURED DEVICES ----
 #include "vex.h"
 
 using namespace vex;
@@ -44,21 +54,21 @@ ZERO_TRACKER_NO_ODOM,
 //You will input whatever motor names you chose when you configured your robot using the sidebar configurer, they don't have to be "Motor1" and "Motor2".
 
 //Left Motors:
-motor_group(),
+motor_group(leftBack, leftMid, leftFront),
 
 //Right Motors:
-motor_group(),
+motor_group(rightBack, rightMid, rightFront),
 
 //Specify the PORT NUMBER of your inertial sensor, in PORT format (i.e. "PORT1", not simply "1"):
-PORT1,
+PORT21,
 
 //Input your wheel diameter. (4" omnis are actually closer to 4.125"):
-3.25,
+2.75,
 
 //External ratio, must be in decimal, in the format of input teeth/output teeth.
 //If your motor has an 84-tooth gear and your wheel has a 60-tooth gear, this value will be 1.4.
 //If the motor drives the wheel directly, this value is 1:
-0.6,
+0.75,
 
 //Gyro scale, this is what your gyro reads when you spin the robot 360 degrees.
 //For most cases 360 will do fine here, but this scale factor can be very helpful when precision is necessary.
@@ -175,7 +185,7 @@ void autonomous(void) {
   auto_started = true;
   switch(current_auton_selection){ 
     case 0:
-      drive_test();
+      leftSide();
       break;
     case 1:         
       drive_test();
@@ -212,6 +222,20 @@ void autonomous(void) {
 /*---------------------------------------------------------------------------*/
 
 void usercontrol(void) {
+
+  chassis.DriveR.setStopping(coast);
+  chassis.DriveL.setStopping(coast);
+
+  Controller.ButtonY.pressed([] {
+    if(!matchloadActive) {
+      matchload.open();
+    }
+    else {
+      matchload.close();
+    }
+    matchloadActive = !matchloadActive;
+  });
+
   // User control code here, inside the loop
   while (1) {
     // This is the main execution loop for the user control program.
@@ -225,6 +249,35 @@ void usercontrol(void) {
 
     //Replace this line with chassis.control_tank(); for tank drive 
     //or chassis.control_holonomic(); for holo drive.
+    if(Controller.ButtonR1.pressing()) {
+      // hood.close();
+      intakeFront.spin(fwd, 100, pct);
+      intakeBack.spin(fwd, 100, pct);
+      intakeTop.spin(fwd, 100, pct);
+    }
+    else if(Controller.ButtonR2.pressing()) {
+      intakeFront.spin(reverse, 100, pct);
+      intakeBack.spin(fwd, 100, pct);
+      intakeTop.spin(reverse, 100, pct);
+      agitator.spin(fwd, 100, pct);
+    }
+    else if(Controller.ButtonL1.pressing()) {
+      //Score in top
+      hood.open();
+      intakeMotors.spin(fwd, 100, pct);
+    }
+    else if(Controller.ButtonL2.pressing()) {
+      //Score in middle
+      intakeFront.spin(fwd, 100, pct);
+      intakeBack.spin(fwd, 100, pct);
+      intakeTop.spin(reverse, 100, pct);
+      agitator.spin(fwd, 100, pct);
+    }
+    else {
+      intakeMotors.stop();
+    }
+
+
     chassis.control_arcade();
 
     wait(20, msec); // Sleep the task for a short amount of time to
