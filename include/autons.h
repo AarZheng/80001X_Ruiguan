@@ -6,6 +6,7 @@ class Drive;
 extern Drive chassis;
 
 void default_constants();
+void odom_constants();
 
 void drive_test();
 void turn_test();
@@ -15,4 +16,11 @@ void odom_test();
 void tank_odom_test();
 void holonomic_odom_test();
 
-void leftSide();
+void leftLong(bool allColor);
+void rightLong(bool allColor);
+void leftCenter(bool allColor);
+void rightCenter(bool allColor);
+void sawp(bool allColor);
+void temp(bool allColor);
+
+extern thread intakeThread;

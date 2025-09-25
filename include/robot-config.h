@@ -22,8 +22,12 @@ extern motor_group intakeMotors;
 
 extern pneumatics matchload;
 extern pneumatics hood;
+extern pneumatics descore;
+
+extern optical colorSorter;
 
 extern bool matchloadActive;
 extern bool topScoring;
+extern bool descoreActive;
 
 void  vexcodeInit( void );

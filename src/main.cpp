@@ -1,6 +1,11 @@
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
+// Motor11              motor         11              
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
 // Motor5               motor         5               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 // ---- START VEXCODE CONFIGURED DEVICES ----
@@ -9,6 +14,7 @@
 // Motor1               motor         1               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 #include "vex.h"
+#include "functions.h"
 
 using namespace vex;
 competition Competition;
@@ -48,7 +54,7 @@ Drive chassis(
 //HOLONOMIC_TWO_ROTATION
 //
 //Write it here:
-ZERO_TRACKER_NO_ODOM,
+TANK_TWO_ROTATION,
 
 //Add the names of your Drive motors into the motor groups below, separated by commas, i.e. motor_group(Motor1,Motor2,Motor3).
 //You will input whatever motor names you chose when you configured your robot using the sidebar configurer, they don't have to be "Motor1" and "Motor2".
@@ -72,7 +78,7 @@ PORT21,
 
 //Gyro scale, this is what your gyro reads when you spin the robot 360 degrees.
 //For most cases 360 will do fine here, but this scale factor can be very helpful when precision is necessary.
-360,
+358.1,
 
 /*---------------------------------------------------------------------------*/
 /*                                  PAUSE!                                   */
@@ -94,24 +100,24 @@ PORT3,     -PORT4,
 //If you are using position tracking, this is the Forward Tracker port (the tracker which runs parallel to the direction of the chassis).
 //If this is a rotation sensor, enter it in "PORT1" format, inputting the port below.
 //If this is an encoder, enter the port as an integer. Triport A will be a "1", Triport B will be a "2", etc.
-3,
+PORT17,
 
 //Input the Forward Tracker diameter (reverse it to make the direction switch):
-2.75,
+2.0,
 
 //Input Forward Tracker center distance (a positive distance corresponds to a tracker on the right side of the robot, negative is left.)
 //For a zero tracker tank drive with odom, put the positive distance from the center of the robot to the right side of the drive.
 //This distance is in inches:
--2,
+0, //0
 
 //Input the Sideways Tracker Port, following the same steps as the Forward Tracker Port:
-1,
+PORT19,
 
 //Sideways tracker diameter (reverse to make the direction switch):
--2.75,
+2.0,
 
 //Sideways tracker center distance (positive distance is behind the center of the robot, negative is in front):
-5.5
+1
 
 );
 
@@ -128,7 +134,7 @@ bool auto_started = false;
 void pre_auton() {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
-  default_constants();
+  odom_constants();
 
   while(!auto_started){
     Brain.Screen.clearScreen();
@@ -140,28 +146,28 @@ void pre_auton() {
     Brain.Screen.printAt(5, 120, "Selected Auton:");
     switch(current_auton_selection){
       case 0:
-        Brain.Screen.printAt(5, 140, "Auton 1");
+        Brain.Screen.printAt(5, 140, "Red long right");
         break;
       case 1:
-        Brain.Screen.printAt(5, 140, "Auton 2");
+        Brain.Screen.printAt(5, 140, "Blue long right");
         break;
       case 2:
-        Brain.Screen.printAt(5, 140, "Auton 3");
+        Brain.Screen.printAt(5, 140, "Blue long left");
         break;
       case 3:
-        Brain.Screen.printAt(5, 140, "Auton 4");
+        Brain.Screen.printAt(5, 140, "Blue long right");
         break;
       case 4:
-        Brain.Screen.printAt(5, 140, "Auton 5");
+        Brain.Screen.printAt(5, 140, "Red center right");
         break;
       case 5:
-        Brain.Screen.printAt(5, 140, "Auton 6");
+        Brain.Screen.printAt(5, 140, "Blue center right");
         break;
       case 6:
-        Brain.Screen.printAt(5, 140, "Auton 7");
+        Brain.Screen.printAt(5, 140, "Red SAWP");
         break;
       case 7:
-        Brain.Screen.printAt(5, 140, "Auton 8");
+        Brain.Screen.printAt(5, 140, "Blue SAWP");
         break;
     }
     if(Brain.Screen.pressing()){
@@ -181,32 +187,44 @@ void pre_auton() {
  * autons.cpp and declared in autons.h.
  */
 
+static bool allColor = false; //True for blue, false for red
+
 void autonomous(void) {
   auto_started = true;
   switch(current_auton_selection){ 
     case 0:
-      leftSide();
+      allColor = false;        
+      rightLong(allColor);
+      // temp(allColor);
+      printf("gurt");
       break;
-    case 1:         
-      drive_test();
+    case 1:
+      allColor = true;         
+      rightLong(allColor);
       break;
     case 2:
-      turn_test();
+      allColor = true;
+      leftLong(allColor);
       break;
     case 3:
-      swing_test();
+      allColor = true;
+      rightLong(allColor);
       break;
     case 4:
-      full_test();
+      allColor = false;
+      rightCenter(allColor);
       break;
     case 5:
-      odom_test();
+      allColor = true;
+      rightCenter(allColor);
       break;
     case 6:
-      tank_odom_test();
+      allColor = false;
+      sawp(allColor);
       break;
     case 7:
-      holonomic_odom_test();
+      allColor = true;
+      sawp(allColor);
       break;
  }
 }
@@ -220,11 +238,16 @@ void autonomous(void) {
 /*                                                                           */
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
+bool useSensors = true;
+
 
 void usercontrol(void) {
+  descore.close();
 
   chassis.DriveR.setStopping(coast);
   chassis.DriveL.setStopping(coast);
+  intakeThread.interrupt();
+  isAuto = false;
 
   Controller.ButtonY.pressed([] {
     if(!matchloadActive) {
@@ -234,6 +257,34 @@ void usercontrol(void) {
       matchload.close();
     }
     matchloadActive = !matchloadActive;
+  });
+
+  Controller.ButtonRight.pressed([] {
+    if(!descoreActive) {
+      descore.open();
+    }
+    else {
+      descore.close();
+    }
+    descoreActive = !descoreActive;
+  });
+
+  Controller.ButtonB.pressed([] {
+    Controller.Screen.setCursor(1, 1);
+    Controller.Screen.clearLine();
+    if(allColor == true) {
+      allColor = nullptr;
+      Controller.Screen.print("Not sorting");
+    }
+    else if(allColor == false) {
+      allColor = true;
+      Controller.Screen.print("Sorting blue");
+    }
+    else {
+      allColor = false;
+      Controller.Screen.print("Sorting red");
+    }
+    
   });
 
   // User control code here, inside the loop
@@ -249,32 +300,26 @@ void usercontrol(void) {
 
     //Replace this line with chassis.control_tank(); for tank drive 
     //or chassis.control_holonomic(); for holo drive.
-    if(Controller.ButtonR1.pressing()) {
-      // hood.close();
-      intakeFront.spin(fwd, 100, pct);
-      intakeBack.spin(fwd, 100, pct);
-      intakeTop.spin(fwd, 100, pct);
-    }
-    else if(Controller.ButtonR2.pressing()) {
-      intakeFront.spin(reverse, 100, pct);
-      intakeBack.spin(fwd, 100, pct);
-      intakeTop.spin(reverse, 100, pct);
-      agitator.spin(fwd, 100, pct);
-    }
-    else if(Controller.ButtonL1.pressing()) {
-      //Score in top
-      hood.open();
-      intakeMotors.spin(fwd, 100, pct);
-    }
-    else if(Controller.ButtonL2.pressing()) {
-      //Score in middle
-      intakeFront.spin(fwd, 100, pct);
-      intakeBack.spin(fwd, 100, pct);
-      intakeTop.spin(reverse, 100, pct);
-      agitator.spin(fwd, 100, pct);
-    }
-    else {
-      intakeMotors.stop();
+    if(!intakeCommand) {
+
+      if(Controller.ButtonR1.pressing()) {
+        intakeStore(useSensors, allColor);
+      }
+      else if(Controller.ButtonR2.pressing() ) {
+        outtake();
+      }
+      else if(Controller.ButtonL1.pressing()) {
+        //Score in top
+        intakeScoreTop();
+      }
+      else if(Controller.ButtonL2.pressing()) {
+        //Score in middle
+        intakeScoreMid();
+      }
+      else {
+        intakeMotors.stop();
+      }
+
     }
 
 
