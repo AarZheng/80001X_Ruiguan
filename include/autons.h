@@ -22,5 +22,6 @@ void leftCenter(bool allColor);
 void rightCenter(bool allColor);
 void sawp(bool allColor);
 void temp(bool allColor);
+void skills();
 
 extern thread intakeThread;

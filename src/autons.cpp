@@ -14,6 +14,36 @@
 
 thread intakeThread;
 
+void skills() {
+  isAuto = true;
+  Brain.resetTimer();
+  while(chassis.Gyro.isCalibrating()) {
+      wait(20, msec);
+  }
+
+  chassis.set_coordinates(-48, 24, 90);
+  chassis.turn_to_point(-24, -24);
+  chassis.drive_to_point(-24, -24, 0, 6, 6, 3, 100, 2000);
+  printf( " %f\n", chassis.get_X_position());
+  printf( " %f\n", chassis.get_Y_position());
+  // chassis.turn_to_point(0, 0);
+  // chassis.drive_to_point(-12, -12, 0, 8, 6, 3, 100, 2000);
+  // printf( "variable count is equal to %f\n", chassis.get_X_position());
+  // printf( "variable count is equal to %f\n", chassis.get_Y_position());
+  // chassis.turn_to_angle(0);
+  // chassis.drive_stop(hold);
+  // chassis.drive_to_point(-48, 48, 0, 8, 6, 3, 0, 2000);
+  // chassis.turn_to_angle(90);
+  // chassis.drive_to_point(-30, 48, 0, 8, 6, 3, 150, 2000);
+  // // chassis.set_coordinates(-60, 24, 90);
+  // chassis.drive_to_point(-48, 24, 0, 8, 6, 6, 0, 2000);
+  // chassis.drive_to_point(48, 24, 0, 8, 6, 3, 100, 2000);
+  // chassis.turn_to_point(48, 48);
+  // chassis.drive_to_point(48, 48, 0, 8, 6, 3, 100, 2000);
+  // chassis.turn_to_angle(-90);
+  // chassis.drive_to_point(30, 48, 0, 8, 6, 3, 150, 2000);
+}
+
 void leftLong(bool allColor) {
   isAuto = true;
   Brain.resetTimer();
@@ -251,7 +281,7 @@ void default_constants(){
   chassis.set_swing_constants(12, .3, .001, 2, 15);
 
   // Each exit condition set is in the form of (settle_error, settle_time, timeout).
-  chassis.set_drive_exit_conditions(1.5, 300, 5000);
+  chassis.set_drive_exit_conditions(1.5, 150, 5000);
   chassis.set_turn_exit_conditions(1.5, 150, 3000);
   chassis.set_swing_exit_conditions(1, 300, 3000);
 }
@@ -266,7 +296,7 @@ void odom_constants(){
   default_constants();
   chassis.heading_max_voltage = 6;
   chassis.drive_max_voltage = 8;
-  chassis.drive_settle_error = 6;
+  chassis.drive_settle_error = 4;
   chassis.boomerang_lead = 0.2;
   chassis.drive_min_voltage = 0;
 }

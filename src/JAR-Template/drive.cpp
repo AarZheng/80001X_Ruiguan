@@ -374,7 +374,7 @@ void Drive::right_swing_to_angle(float angle, float swing_max_voltage, float swi
 
 float Drive::get_ForwardTracker_position(){
   if (drive_setup==ZERO_TRACKER_ODOM || drive_setup == TANK_ONE_SIDEWAYS_ENCODER || drive_setup == TANK_ONE_SIDEWAYS_ROTATION){
-    return(get_right_position_in());
+    return((get_right_position_in() + get_left_position_in())/2.0); //just right
   }
   if (drive_setup==TANK_ONE_FORWARD_ENCODER || drive_setup == TANK_TWO_ENCODER || drive_setup == HOLONOMIC_TWO_ENCODER){
     return(E_ForwardTracker.position(deg)*ForwardTracker_in_to_deg_ratio);

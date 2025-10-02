@@ -19,7 +19,7 @@ motor_group chassisMotors = motor_group(leftBack, leftMid, leftFront, rightBack,
 
 motor intakeFront = motor(PORT12, false);
 motor intakeBack = motor(PORT2, false);
-motor intakeTop = motor(PORT11, true);
+motor intakeTop = motor(PORT11, false);
 motor agitator = motor(PORT18, true);
 
 motor_group intakeMotors = motor_group(intakeFront, intakeBack, intakeTop, agitator);

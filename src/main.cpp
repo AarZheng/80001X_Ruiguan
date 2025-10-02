@@ -55,6 +55,7 @@ Drive chassis(
 //
 //Write it here:
 TANK_TWO_ROTATION,
+// ZERO_TRACKER_ODOM,
 
 //Add the names of your Drive motors into the motor groups below, separated by commas, i.e. motor_group(Motor1,Motor2,Motor3).
 //You will input whatever motor names you chose when you configured your robot using the sidebar configurer, they don't have to be "Motor1" and "Motor2".
@@ -103,21 +104,21 @@ PORT3,     -PORT4,
 PORT17,
 
 //Input the Forward Tracker diameter (reverse it to make the direction switch):
-2.0,
+2.027,
 
 //Input Forward Tracker center distance (a positive distance corresponds to a tracker on the right side of the robot, negative is left.)
 //For a zero tracker tank drive with odom, put the positive distance from the center of the robot to the right side of the drive.
 //This distance is in inches:
-0, //0
+0,
 
 //Input the Sideways Tracker Port, following the same steps as the Forward Tracker Port:
 PORT19,
 
 //Sideways tracker diameter (reverse to make the direction switch):
-2.0,
+2.027,
 
 //Sideways tracker center distance (positive distance is behind the center of the robot, negative is in front):
-1
+1.5
 
 );
 
@@ -194,9 +195,11 @@ void autonomous(void) {
   switch(current_auton_selection){ 
     case 0:
       allColor = false;        
-      rightLong(allColor);
+      // rightLong(allColor);
+      skills();
+      // odom_test();
       // temp(allColor);
-      printf("gurt");
+      // printf("gurt");
       break;
     case 1:
       allColor = true;         
