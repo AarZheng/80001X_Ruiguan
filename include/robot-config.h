@@ -25,6 +25,10 @@ extern pneumatics hood;
 extern pneumatics descore;
 
 extern optical colorSorter;
+extern distance frontDist;
+extern distance rightDist;
+extern distance leftDist;
+extern distance backDist;
 
 extern bool matchloadActive;
 extern bool topScoring;

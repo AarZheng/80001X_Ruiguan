@@ -4,9 +4,12 @@ using namespace vex;
 void intakeStore(bool sort, bool blue = true);
 void outtake();
 void intakeScoreTop();
-void intakeScoreMid();
+void scoreTopSkills();
+void intakeScoreMid(double speed = 100);
 
 static bool intakeCommand = false;
 static bool isAuto = true;
 
 int autoIntake(void* isBlue);
+
+void distanceReset(int quadrant);

@@ -54,8 +54,8 @@ Drive chassis(
 //HOLONOMIC_TWO_ROTATION
 //
 //Write it here:
-TANK_TWO_ROTATION,
-// ZERO_TRACKER_ODOM,
+// TANK_TWO_ROTATION,
+ZERO_TRACKER_ODOM,
 
 //Add the names of your Drive motors into the motor groups below, separated by commas, i.e. motor_group(Motor1,Motor2,Motor3).
 //You will input whatever motor names you chose when you configured your robot using the sidebar configurer, they don't have to be "Motor1" and "Motor2".
@@ -195,8 +195,9 @@ void autonomous(void) {
   switch(current_auton_selection){ 
     case 0:
       allColor = false;        
-      // rightLong(allColor);
-      skills();
+      rightLong(allColor);
+      // skills();
+      // rightCenter(allColor);
       // odom_test();
       // temp(allColor);
       // printf("gurt");
@@ -275,17 +276,14 @@ void usercontrol(void) {
   Controller.ButtonB.pressed([] {
     Controller.Screen.setCursor(1, 1);
     Controller.Screen.clearLine();
-    if(allColor == true) {
-      allColor = nullptr;
+    if(allColor == false && useSensors == true) {
+      useSensors = false;
       Controller.Screen.print("Not sorting");
     }
-    else if(allColor == false) {
-      allColor = true;
-      Controller.Screen.print("Sorting blue");
-    }
     else {
-      allColor = false;
-      Controller.Screen.print("Sorting red");
+      useSensors = true;
+      allColor = !allColor;
+      Controller.Screen.print("Sorting out ", allColor ? "red" : "blue");
     }
     
   });
@@ -317,7 +315,7 @@ void usercontrol(void) {
       }
       else if(Controller.ButtonL2.pressing()) {
         //Score in middle
-        intakeScoreMid();
+        intakeScoreMid(50);
       }
       else {
         intakeMotors.stop();
