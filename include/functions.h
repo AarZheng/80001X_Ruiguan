@@ -10,5 +10,6 @@ static bool intakeCommand = false;
 static bool isAuto = true;
 
 int autoIntake(void* isBlue);
+int autoScore(void* isBlue);
 
 void distanceReset(int quadrant);

@@ -40,10 +40,6 @@ void rightLong(bool allColor) {
       wait(20, msec);
   }
 
-  hood.open();
-  wait(50, msec);
-  hood.close();
-
   intakeThread = thread(autoIntake, &allColor);
   chassis.set_coordinates(-48, -16, 90);
   chassis.drive_to_point(-24, -24, 6, 10, 6, 6, 0, 2000);
@@ -68,11 +64,52 @@ void temp(bool allColor) {
 }
 
 void rightCenter(bool allColor) {
+  isAuto = true;
+  odom_constants();
+  Brain.resetTimer();
+  while(chassis.Gyro.isCalibrating()) {
+      wait(20, msec);
+  }
 
+  intakeThread = thread(autoIntake, &allColor);
+  agitator.spin(fwd, 100, pct);
+  chassis.set_coordinates(-48, -16, 180);
+  chassis.drive_to_point(-48, -48, 0, 10, 6, 2, 100, 2000);
+  chassis.turn_to_angle(-90);
+  distanceReset(0);
+  matchload.open();
+  chassis.drive_to_point(-70, -48, 0, 4, 6, 0, 200, 2000); //Getting matchload balls
+  chassis.drive_to_point(-48, -48, 0, 8, 6, 6, 50, 2000);
+  matchload.close();
+  chassis.turn_to_angle(90);
+  distanceReset(0);
+  chassis.drive_to_point(-24, -48, 0, 4, 6, 0, 200, 1000);
+  intakeThread.interrupt();
+  intakeMotors.stop();
+  intakeThread = thread(autoScore, &allColor); //Scores 4 into long
+  wait(500, msec);
+  chassis.drive_to_point(-48, -48, 0, 8, 6, 6, 50, 2000);
+  distanceReset(0);
+  intakeThread.interrupt();
+  intakeThread = thread(autoIntake, &allColor);
+  chassis.drive_to_point(-21, -21, 0, 8, 6, 3, 100, 2000);
+  chassis.drive_to_point(-5, -5, 0, 4, 2, 0, 0, 1000);
+  chassis.drive_to_point(-10, -10, 0, 4, 2, 3, 100, 2000);
+  intakeThread.interrupt();
+  outtake(); //Scores 3 balls into bottom mid
+  wait(500, msec);
+  chassis.drive_to_point(-21, -21, 4, 8, 6, 6, 20, 2000);
+  chassis.drive_to_point(-21, 21, 0, 8, 6, 3, 100, 2000);
+  chassis.turn_to_angle(0);
+  distanceReset(0);
+  chassis.turn_to_point(0, 0);
+  chassis.drive_to_point(-9, 9, 0, 4, 2, 3, 100, 2000);
+  intakeScoreMid(75); //Scores 3 balls into top mid
 }
 
+//Entirely theory coded. Needs to score 10, in 3 goals, 2 blocks/goal, 3 blocks out of matchloader
 void sawp(bool allColor) {
-
+  
 }
 
 void default_constants(){
