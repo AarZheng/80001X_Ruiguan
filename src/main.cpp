@@ -276,16 +276,16 @@ void usercontrol(void) {
   Controller.ButtonB.pressed([] {
     Controller.Screen.setCursor(1, 1);
     Controller.Screen.clearLine();
-    if(allColor == false && useSensors == true) {
-      useSensors = false;
-      Controller.Screen.print("Not sorting");
-    }
-    else {
-      useSensors = true;
-      allColor = !allColor;
-      Controller.Screen.print("Sorting out ", allColor ? "red" : "blue");
-    }
-    
+    useSensors = true;
+    allColor = !allColor;
+    Controller.Screen.print("SORTING: ", allColor ? "RED" : "BLUE");
+  });
+
+  Controller.ButtonA.pressed([] {
+    Controller.Screen.setCursor(1, 1);
+    Controller.Screen.clearLine();
+    useSensors = false;
+    Controller.Screen.print("NOT SORTING");
   });
 
   // User control code here, inside the loop
@@ -311,7 +311,7 @@ void usercontrol(void) {
       }
       else if(Controller.ButtonL1.pressing()) {
         //Score in top
-        intakeScoreTop();
+        intakeScoreTop(useSensors, allColor);
       }
       else if(Controller.ButtonL2.pressing()) {
         //Score in middle

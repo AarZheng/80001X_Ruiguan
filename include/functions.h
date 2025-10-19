@@ -3,8 +3,7 @@ using namespace vex;
 
 void intakeStore(bool sort, bool blue = true);
 void outtake();
-void intakeScoreTop();
-void scoreTopSkills();
+void intakeScoreTop(bool sort, bool blue = true);
 void intakeScoreMid(double speed = 100);
 
 static bool intakeCommand = false;

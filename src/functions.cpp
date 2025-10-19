@@ -12,6 +12,15 @@ int autoIntake(void *isBlue) {
   return 0;
 }
 
+int autoScore(void *isBlue) {
+  while(isAuto) {
+    intakeScoreTop(true, *(bool *)isBlue);
+    wait(5, msec);
+  }
+  return 0;
+}
+
+
 void intakeStore(bool sort, bool isBlue) {
   if(sort && 
   ((isBlue == true && colorSorter.hue() > 0 && colorSorter.hue() < 30) || 
@@ -43,78 +52,24 @@ void outtake() {
   agitator.spin(fwd, 100, pct);
 }
 
-void intakeScoreTop() {
-  hood.open();
-  intakeMotors.spin(fwd, 100, pct);
+void intakeScoreTop(bool sort, bool isBlue) {
+  if(sort && 
+  ((isBlue == true && colorSorter.hue() > 0 && colorSorter.hue() < 30) || 
+  (isBlue == false && colorSorter.hue() > 180 && colorSorter.hue() < 240))) {
+    intakeCommand = true;
+    hood.close();
+    intakeMotors.spin(fwd, 100, pct);
+    wait(250, msec);
+    intakeCommand = false;
+  }
+  else {
+    hood.open();
+    intakeMotors.spin(fwd, 100, pct);
+  }
 }
 
-
-static int skillsScoringState = 0;
-static int numBalls = 0;
-void scoreTopSkills() {
-  switch(skillsScoringState) {
-    case 0: //Scoring blue, counting
-
-    if(numBalls >= 6) {
-      skillsScoringState = 1;
-      numBalls = 0;
-      return;
-    }
-
-    if(colorSorter.hue() > 180 && colorSorter.hue() < 240) {
-      hood.close();
-      numBalls++;
-      intakeCommand = true;
-      intakeFront.spin(fwd, 100, pct);
-      intakeBack.spin(fwd, 100, pct);
-      intakeTop.spin(fwd, 100, pct);
-      wait(250, msec);
-      intakeCommand = false;
-    }
-
-    else if (colorSorter.hue() > 0 && colorSorter.hue() < 30){
-      hood.open();
-      intakeCommand = true;
-      intakeFront.spin(fwd, 100, pct);
-      intakeBack.spin(fwd, 100, pct);
-      intakeTop.spin(fwd, 100, pct);
-      wait(250, msec);
-      intakeCommand = false;
-    }
-    break;
-    case 1: //Scoring red, counting
-
-    if(numBalls >= 5) {
-      skillsScoringState = 2;
-      numBalls = 0;
-      return;
-    }
-
-    if(colorSorter.hue() > 0 && colorSorter.hue() < 30) {
-      hood.close();
-      numBalls++;
-      intakeCommand = true;
-      intakeFront.spin(fwd, 100, pct);
-      intakeBack.spin(fwd, 100, pct);
-      intakeTop.spin(fwd, 100, pct);
-      wait(250, msec);
-      intakeCommand = false;
-    }
-
-    else if (colorSorter.hue() > 180 && colorSorter.hue() < 240){
-      hood.open();
-      intakeCommand = true;
-      intakeFront.spin(fwd, 100, pct);
-      intakeBack.spin(fwd, 100, pct);
-      intakeTop.spin(fwd, 100, pct);
-      wait(250, msec);
-      intakeCommand = false;
-    }
-    break;
-    case 2:
-
-    break;
-  }
+void intakeScoreTop(bool isBlue) {
+  intakeScoreTop(true, isBlue);
 }
 
 void intakeScoreMid(double speed) {
@@ -178,12 +133,6 @@ void distanceReset(int quadrant) {
 
     printf("Quadrant selected: %i\n", quadrant);
   }
-  // else {
-  //   quadrant = -1;
-  //   printf("ERROR: Failed quadrant selection");
-  //   printf( "X: %f\n", chassis.get_X_position());
-  //   printf( "Y: %f\n", chassis.get_Y_position());
-  // }
 
   int resetAngle = std::round(chassis.get_absolute_heading() / 90.0);
   if(resetAngle == 360) resetAngle = 0;
@@ -267,3 +216,71 @@ void distanceReset(int quadrant) {
   }
   printf("Position updated to: X = %f, Y = %f\n", chassis.get_X_position(), chassis.get_Y_position());
 }
+
+// static int skillsScoringState = 0;
+// static int numBalls = 0;
+// void scoreTopSkills() {
+//   switch(skillsScoringState) {
+//     case 0: //Scoring blue, counting
+
+//     if(numBalls >= 6) {
+//       skillsScoringState = 1;
+//       numBalls = 0;
+//       return;
+//     }
+
+//     if(colorSorter.hue() > 180 && colorSorter.hue() < 240) {
+//       hood.close();
+//       numBalls++;
+//       intakeCommand = true;
+//       intakeFront.spin(fwd, 100, pct);
+//       intakeBack.spin(fwd, 100, pct);
+//       intakeTop.spin(fwd, 100, pct);
+//       wait(250, msec);
+//       intakeCommand = false;
+//     }
+
+//     else if (colorSorter.hue() > 0 && colorSorter.hue() < 30){
+//       hood.open();
+//       intakeCommand = true;
+//       intakeFront.spin(fwd, 100, pct);
+//       intakeBack.spin(fwd, 100, pct);
+//       intakeTop.spin(fwd, 100, pct);
+//       wait(250, msec);
+//       intakeCommand = false;
+//     }
+//     break;
+//     case 1: //Scoring red, counting
+
+//     if(numBalls >= 5) {
+//       skillsScoringState = 2;
+//       numBalls = 0;
+//       return;
+//     }
+
+//     if(colorSorter.hue() > 0 && colorSorter.hue() < 30) {
+//       hood.close();
+//       numBalls++;
+//       intakeCommand = true;
+//       intakeFront.spin(fwd, 100, pct);
+//       intakeBack.spin(fwd, 100, pct);
+//       intakeTop.spin(fwd, 100, pct);
+//       wait(250, msec);
+//       intakeCommand = false;
+//     }
+
+//     else if (colorSorter.hue() > 180 && colorSorter.hue() < 240){
+//       hood.open();
+//       intakeCommand = true;
+//       intakeFront.spin(fwd, 100, pct);
+//       intakeBack.spin(fwd, 100, pct);
+//       intakeTop.spin(fwd, 100, pct);
+//       wait(250, msec);
+//       intakeCommand = false;
+//     }
+//     break;
+//     case 2:
+
+//     break;
+//   }
+// }

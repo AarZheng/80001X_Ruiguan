@@ -26,69 +26,9 @@ void skills() {
   chassis.drive_to_point(-24, -24, 0, 6, 6, 3, 100, 2000);
   printf( " %f\n", chassis.get_X_position());
   printf( " %f\n", chassis.get_Y_position());
-  // chassis.turn_to_point(0, 0);
-  // chassis.drive_to_point(-12, -12, 0, 8, 6, 3, 100, 2000);
-  // printf( "variable count is equal to %f\n", chassis.get_X_position());
-  // printf( "variable count is equal to %f\n", chassis.get_Y_position());
-  // chassis.turn_to_angle(0);
-  // chassis.drive_stop(hold);
-  // chassis.drive_to_point(-48, 48, 0, 8, 6, 3, 0, 2000);
-  // chassis.turn_to_angle(90);
-  // chassis.drive_to_point(-30, 48, 0, 8, 6, 3, 150, 2000);
-  // // chassis.set_coordinates(-60, 24, 90);
-  // chassis.drive_to_point(-48, 24, 0, 8, 6, 6, 0, 2000);
-  // chassis.drive_to_point(48, 24, 0, 8, 6, 3, 100, 2000);
-  // chassis.turn_to_point(48, 48);
-  // chassis.drive_to_point(48, 48, 0, 8, 6, 3, 100, 2000);
-  // chassis.turn_to_angle(-90);
-  // chassis.drive_to_point(30, 48, 0, 8, 6, 3, 150, 2000);
 }
 
 void leftLong(bool allColor) {
-  isAuto = true;
-  Brain.resetTimer();
-  while(chassis.Gyro.isCalibrating()) {
-      wait(20, msec);
-  }
-
-  hood.open();
-  wait(50, msec);
-  hood.close();
-
-  intakeThread = thread(autoIntake, &allColor);
-  // chassis.set_coordinates(-45.5, 8, 90);
-  chassis.set_coordinates(-48, 18, 90);
-  chassis.drive_max_voltage = 6;
-  chassis.turn_to_point(-18, 20);
-  chassis.drive_to_point(-18, 20); 
-  // chassis.drive_distance(-3);
-  chassis.drive_stop(hold);
-  chassis.drive_max_voltage = 6;
-  chassis.turn_to_angle(75);
-  chassis.drive_max_voltage = 8;
-  chassis.turn_to_point(-43, 45);
-  chassis.drive_to_point(-43, 45);
-  chassis.drive_stop(hold);
-  chassis.turn_to_angle(-90);
-  matchload.open();
-  wait(500, msec);
-  // chassis.drive_to_point(-50, 48);
-  chassis.drive_to_point(-70, 48, 0, 6, 2, chassis.drive_settle_error, chassis.drive_settle_time, 1750);
-  chassis.drive_to_point(-48, 52);
-  Controller.Screen.clearScreen();
-  Controller.Screen.setCursor(1, 1);
-  Controller.Screen.print(chassis.get_X_position());
-  Controller.Screen.setCursor(2, 1);
-  Controller.Screen.print(chassis.get_Y_position());
-  chassis.drive_stop(hold);
-  matchload.close();
-  chassis.turn_to_point(-34, 52);
-  chassis.drive_to_point(-34, 52);
-  chassis.drive_stop(hold);
-  chassis.turn_to_angle(90);
-  chassis.drive_to_point(0, 48, 0, 2, 2, chassis.drive_settle_error, chassis.drive_settle_time, 300);
-  intakeThread.interrupt();
-  intakeScoreTop();
 
 }
 
@@ -108,7 +48,6 @@ void rightLong(bool allColor) {
   chassis.set_coordinates(-48, -16, 90);
   chassis.drive_to_point(-24, -24, 6, 10, 6, 6, 0, 2000);
   matchload.open();
-  // chassis.drive_to_point(-12, -40, 0, 8, 6, 3, 100, 2000);
   chassis.drive_to_pose(-18, -42, 105);
   chassis.drive_to_point(-36, -33, 0, 8, 6, 8, 100, 2000);
   matchload.close();
@@ -128,105 +67,11 @@ void temp(bool allColor) {
   intakeThread = thread(autoIntake, &allColor);
 }
 
-void leftCenter(bool allColor) {
-
-}
-
 void rightCenter(bool allColor) {
-  isAuto = true;
-  odom_constants();
-  Brain.resetTimer();
-  while(chassis.Gyro.isCalibrating()) {
-      wait(20, msec);
-  }
-
-  hood.open();
-  wait(50, msec);
-  hood.close();
-  
-  chassis.set_coordinates(-48, -16, 90);
-  intakeThread = thread(autoIntake, &allColor);
-  chassis.turn_to_point(-48, -48);
-  chassis.drive_to_point(-48, -48, 0, 8, 6, 6, 40, 2000);
-  chassis.turn_to_angle(-90);
-  printf( "before reset %f\n", chassis.get_X_position());
-  printf( " %f\n", chassis.get_Y_position());
-  printf( " %f\n", chassis.get_absolute_heading());
-  // chassis.set_coordinates(-72 + (frontDist.objectDistance(inches) + 6), -72 + (leftDist.objectDistance(inches) + 6.5), chassis.get_absolute_heading());
-  distanceReset(0);
-  printf( "after reset %f\n", chassis.get_X_position());
-  printf( " %f\n", chassis.get_Y_position());
-  printf( " %f\n", chassis.get_absolute_heading());
-  // matchload.open();
-  // chassis.drive_to_point(-70, -48, 0, 4, 6, 0, 200, 2000);
-  // chassis.odom.X_position = -72 + (frontDist.objectDistance(inches) + 6);
-  // chassis.drive_to_point(-48, -48, 0, 8, 6, 6, 50, 2000);
-  // matchload.close();
-  // chassis.turn_to_angle(-90);
-  // // chassis.set_coordinates(-72 + (frontDist.objectDistance(inches) + 6), -72 + (leftDist.objectDistance(inches) + 6.5), chassis.get_absolute_heading());
-  // distanceReset(3);
-  // printf( "after reset %f\n", chassis.get_X_position());
-  // printf( " %f\n", chassis.get_Y_position());
-  // printf( " %f\n", chassis.get_absolute_heading());
-  // // chassis.turn_to_point(-24, -24);
-  // // chassis.drive_to_point(-24, -24, 0, 4, 6, 6, 50, 2000);
-  // chassis.turn_to_point(-12, -12);
-  // chassis.drive_to_point(-12, -12, 0, 4.5, 6, 2, 100, 4000);
-  // chassis.drive_stop(hold);
-  // intakeThread.interrupt();
-  // intakeScoreMid(75);
-  // wait(500, msec);
-
-
 
 }
 
 void sawp(bool allColor) {
-  isAuto = true;
-  odom_constants();
-  Brain.resetTimer();
-  while(chassis.Gyro.isCalibrating()) {
-      wait(20, msec);
-  }
-
-  hood.open();
-  wait(50, msec);
-  hood.close();
-
-
-  chassis.set_coordinates(-48, -18, 90);
-  chassis.turn_to_point(-42, -48);
-  chassis.drive_to_point(-42, -48);
-  chassis.turn_to_point(0, -46);
-  Controller.Screen.clearScreen();
-  Controller.Screen.print(chassis.get_X_position());
-  Controller.Screen.setCursor(2, 1);
-  Controller.Screen.print(chassis.get_Y_position());
-  wait(500, msec);
-  // chassis.drive_to_point(-32, -48);
-  chassis.drive_distance(40, 90, 6, 2, chassis.drive_settle_error, chassis.drive_settle_time, 1000);
-  // chassis.drive_to_point(0, -46, 0, 2, 2, chassis.drive_settle_error, chassis.drive_settle_time, 1000);
-  intakeScoreTop();
-  wait(200, msec);
-  chassis.drive_distance(-20);
-  chassis.turn_to_point(-100, -48);
-  intakeThread = thread(autoIntake, &allColor);
-  matchload.open();
-  chassis.drive_to_point(-50, -48);
-  chassis.drive_to_point(-70, -48, 0, 6, 2, chassis.drive_settle_error, chassis.drive_settle_time, 850);
-  chassis.drive_to_point(-48, -48);
-  matchload.close();
-  chassis.drive_to_point(-22, -22);
-  chassis.drive_to_point(-11, -11);
-  chassis.turn_to_point(11, 11);
-  intakeThread.interrupt();
-  intakeScoreMid();
-  wait(1, sec);
-  chassis.drive_to_point(-22, -22);
-  intakeThread = thread(autoIntake, &allColor);
-  chassis.turn_to_point(-22, 22);
-  chassis.drive_to_point(-22, 22);
-  
 
 }
 

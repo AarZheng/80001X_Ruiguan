@@ -35,7 +35,7 @@ bool descoreActive = false;
 optical colorSorter = optical(PORT15);
 distance rightDist = distance(PORT14); //6.5
 distance backDist = distance(PORT5); //7
-distance frontDist = distance(PORT3); //6
+distance frontDist = distance(PORT1); //6
 distance leftDist = distance(PORT4);
 
 void vexcodeInit( void ) {
