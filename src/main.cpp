@@ -246,7 +246,8 @@ bool useSensors = true;
 
 
 void usercontrol(void) {
-  descore.close();
+  descore.open();
+  Controller.Screen.clearScreen();
 
   chassis.DriveR.setStopping(coast);
   chassis.DriveL.setStopping(coast);
@@ -278,15 +279,23 @@ void usercontrol(void) {
     Controller.Screen.clearLine();
     useSensors = true;
     allColor = !allColor;
-    Controller.Screen.print("SORTING: ", allColor ? "RED" : "BLUE");
+    Controller.Screen.print("Alliance color: %s", allColor ? "BLUE" : "RED");
   });
 
   Controller.ButtonA.pressed([] {
-    Controller.Screen.setCursor(1, 1);
-    Controller.Screen.clearLine();
-    useSensors = false;
-    Controller.Screen.print("NOT SORTING");
+    Controller.Screen.setCursor(4, 1);
+    Controller.Screen.clearLine(4);
+    useSensors = !useSensors;
+    Controller.Screen.print("SORTING: %s", useSensors ? "YES" : "NO ");
   });
+
+  Controller.Screen.setCursor(1, 1);
+  Controller.Screen.clearLine();
+  Controller.Screen.print("Alliance color: %s", allColor ? "BLUE" : "RED");
+
+  Controller.Screen.setCursor(4, 1);
+  Controller.Screen.clearLine(4);
+  Controller.Screen.print("SORTING: %s", useSensors ? "YES" : "NO ");
 
   // User control code here, inside the loop
   while (1) {

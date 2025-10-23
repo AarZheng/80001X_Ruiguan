@@ -46,10 +46,10 @@ void intakeStore(bool isBlue) {
 }
 
 void outtake() {
-  intakeFront.spin(reverse, 100, pct);
-  intakeBack.spin(fwd, 100, pct);
-  intakeTop.spin(reverse, 100, pct);
-  agitator.spin(fwd, 100, pct);
+  intakeFront.spin(reverse, 50, pct);
+  intakeBack.spin(fwd, 50, pct);
+  intakeTop.spin(reverse, 75, pct);
+  agitator.spin(fwd, 75, pct);
 }
 
 void intakeScoreTop(bool sort, bool isBlue) {
@@ -58,12 +58,20 @@ void intakeScoreTop(bool sort, bool isBlue) {
   (isBlue == false && colorSorter.hue() > 180 && colorSorter.hue() < 240))) {
     intakeCommand = true;
     hood.close();
-    intakeMotors.spin(fwd, 100, pct);
-    wait(250, msec);
+    // intakeMotors.spin(fwd, 50, pct);
+    intakeBack.spin(fwd, 100, pct);
+    intakeTop.spin(fwd, 100, pct);
+    agitator.spin(fwd, 25, pct);
+    intakeFront.stop();
+    wait(350, msec);
     intakeCommand = false;
   }
-  else {
+  else if ((isBlue == false && colorSorter.hue() > 0 && colorSorter.hue() < 30) || 
+    (isBlue == true && colorSorter.hue() > 180 && colorSorter.hue() < 240)) {
     hood.open();
+    intakeMotors.spin(fwd, 100, pct);
+  }
+  else {
     intakeMotors.spin(fwd, 100, pct);
   }
 }
