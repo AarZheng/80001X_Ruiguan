@@ -53,27 +53,32 @@ void outtake() {
 }
 
 void intakeScoreTop(bool sort, bool isBlue) {
-  if(sort && 
-  ((isBlue == true && colorSorter.hue() > 0 && colorSorter.hue() < 30) || 
-  (isBlue == false && colorSorter.hue() > 180 && colorSorter.hue() < 240))) {
-    intakeCommand = true;
-    hood.close();
-    // intakeMotors.spin(fwd, 50, pct);
-    intakeBack.spin(fwd, 100, pct);
-    intakeTop.spin(fwd, 100, pct);
-    agitator.spin(fwd, 25, pct);
-    intakeFront.stop();
-    wait(350, msec);
-    intakeCommand = false;
-  }
-  else if ((isBlue == false && colorSorter.hue() > 0 && colorSorter.hue() < 30) || 
-    (isBlue == true && colorSorter.hue() > 180 && colorSorter.hue() < 240)) {
+  // if(sort && 
+  // // ((isBlue == true && colorSorter.hue() > 0 && colorSorter.hue() < 30) || 
+  // // (isBlue == false && colorSorter.hue() > 180 && colorSorter.hue() < 240))) {
+  // //   intakeCommand = true;
+  // //   hood.close();
+  // //   // intakeMotors.spin(fwd, 50, pct);
+  // //   intakeBack.spin(fwd, 100, pct);
+  // //   intakeTop.spin(fwd, 100, pct);
+  // //   agitator.spin(fwd, 25, pct);
+  // //   intakeFront.stop();
+  // //   wait(350, msec);
+  // //   intakeCommand = false;
+  // // }
+  // // else if ((isBlue == false && colorSorter.hue() > 0 && colorSorter.hue() < 30) || 
+  // //   (isBlue == true && colorSorter.hue() > 180 && colorSorter.hue() < 240)) {
+  // //   hood.open();
+  // //   intakeMotors.spin(fwd, 100, pct);
+  // // }
+  // // else if(!sort) {
+  // //   hood.open();
+  // //   intakeMotors.spin(fwd, 100, pct);
+  // // }
+  // // else {
     hood.open();
     intakeMotors.spin(fwd, 100, pct);
-  }
-  else {
-    intakeMotors.spin(fwd, 100, pct);
-  }
+  // }
 }
 
 void intakeScoreTop(bool isBlue) {
@@ -95,7 +100,7 @@ float sensorFilter(distance sensor, float odomValue, bool negative) { //Simple l
     sensorValue = frontDist.objectDistance(inches) + 6;
   }
   else if(sensor.objectDistance(inches) == backDist.objectDistance(inches)) {
-    sensorValue = frontDist.objectDistance(inches) + 7;
+    sensorValue = backDist.objectDistance(inches) + 7;
   }
   else if(sensor.objectDistance(inches) == leftDist.objectDistance(inches)){
     sensorValue = leftDist.objectDistance(inches) + 6.5;

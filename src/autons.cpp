@@ -109,6 +109,49 @@ void rightCenter(bool allColor) {
 
 //Entirely theory coded. Needs to score 10, in 3 goals, 2 blocks/goal, 3 blocks out of matchloader
 void sawp(bool allColor) {
+  descore.open();
+  isAuto = true;
+  odom_constants();
+  Brain.resetTimer();
+  while(chassis.Gyro.isCalibrating()) {
+      wait(20, msec);
+  }
+
+  intakeThread = thread(autoIntake, &allColor);
+  
+  chassis.set_coordinates(-49, -17, 180);
+  chassis.drive_to_point(-48, -45, 0, 10, 6, 8, 0, 2000);
+  chassis.turn_to_angle(-90);
+  distanceReset(0);
+  matchload.open();
+  chassis.drive_to_point(-70, -48, 0, 4.5, 6, 0, 200, 1500); //Getting matchload balls
+  chassis.drive_to_point(-48, -48, 0, 8, 6, 6, 0, 2000);
+  matchload.close();
+  chassis.turn_to_angle(90);
+  distanceReset(0);
+  chassis.drive_to_point(-32, -48, 0, 8, 6, 6, 0, 2000);
+  chassis.drive_to_point(-24, -48, 0, 4, 6, 0, 150, 500);
+  intakeThread.interrupt();
+  intakeMotors.stop();
+  intakeThread = thread(autoScore, &allColor); //Scores 4 into long
+  distanceReset(0);
+  wait(1500, msec);
+  intakeThread.interrupt();
+  intakeMotors.stop();
+  intakeThread = thread(autoIntake, &allColor);
+  chassis.drive_to_point(-54, -48, 0, 8, 6, 6, 0, 2000);
+  distanceReset(0);
+  chassis.drive_to_point(-24, -24, 0, 6, 6, 5, 0, 2000);
+  chassis.drive_to_point(-24, 24, 0, 6, 10, 3, 100, 2000);
+  distanceReset(0);
+  chassis.turn_to_point(-11, 11);
+  chassis.drive_to_point(-11, 11, 0, 4, 6, 3, 100, 2000);
+  intakeThread.interrupt();
+  intakeMotors.stop();
+  intakeScoreMid();
+
+
+
   
 }
 

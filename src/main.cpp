@@ -194,8 +194,9 @@ void autonomous(void) {
   auto_started = true;
   switch(current_auton_selection){ 
     case 0:
-      allColor = false;        
-      rightLong(allColor);
+      allColor = false;
+      sawp(allColor);        
+      // rightLong(allColor);
       // skills();
       // rightCenter(allColor);
       // odom_test();
