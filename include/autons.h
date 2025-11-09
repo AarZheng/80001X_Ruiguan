@@ -18,6 +18,8 @@ void holonomic_odom_test();
 
 void leftLong(bool allColor);
 void rightLong(bool allColor);
+void leftMidCenter(bool allColor);
+void rightMidCenter(bool allColor);
 void leftCenter(bool allColor);
 void rightCenter(bool allColor);
 void sawp(bool allColor);

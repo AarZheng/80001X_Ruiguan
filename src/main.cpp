@@ -70,7 +70,7 @@ motor_group(rightBack, rightMid, rightFront),
 PORT21,
 
 //Input your wheel diameter. (4" omnis are actually closer to 4.125"):
-2.75,
+2.80,
 
 //External ratio, must be in decimal, in the format of input teeth/output teeth.
 //If your motor has an 84-tooth gear and your wheel has a 60-tooth gear, this value will be 1.4.
@@ -188,14 +188,15 @@ void pre_auton() {
  * autons.cpp and declared in autons.h.
  */
 
-static bool allColor = false; //True for blue, false for red
+static bool allColor = true; //True for blue, false for red
 
 void autonomous(void) {
   auto_started = true;
   switch(current_auton_selection){ 
     case 0:
       allColor = false;
-      sawp(allColor);        
+      // sawp(allColor); 
+      leftMidCenter(allColor);       
       // rightLong(allColor);
       // skills();
       // rightCenter(allColor);
@@ -233,6 +234,19 @@ void autonomous(void) {
       break;
  }
 }
+int agitatorJam() {
+  while(true) {
+    if(agitator.torque() > 0.3 && fabs(agitator.velocity(rpm)) < 10) {
+      printf("%f \n", agitator.efficiency());
+      intakeCommand = true;
+      agitator.spin(reverse, 100, pct);
+      wait(200, msec);
+      intakeCommand = false;
+    }
+    wait(5, msec);
+  }
+  return 0;
+}
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
@@ -247,6 +261,8 @@ bool useSensors = true;
 
 
 void usercontrol(void) {
+  // thread agitatorThread = thread(agitatorJam);
+  antler.open();
   descore.open();
   Controller.Screen.clearScreen();
 
@@ -255,22 +271,22 @@ void usercontrol(void) {
   intakeThread.interrupt();
   isAuto = false;
 
-  Controller.ButtonY.pressed([] {
-    if(!matchloadActive) {
-      matchload.open();
-    }
-    else {
-      matchload.close();
-    }
-    matchloadActive = !matchloadActive;
-  });
+  // Controller.ButtonY.pressed([] {
+  //   if(!matchloadActive) {
+  //     matchload.open();
+  //   }
+  //   else {
+  //     matchload.close();
+  //   }
+  //   matchloadActive = !matchloadActive;
+  // });
 
   Controller.ButtonRight.pressed([] {
     if(!descoreActive) {
-      descore.open();
+      descore.close();
     }
     else {
-      descore.close();
+      descore.open();
     }
     descoreActive = !descoreActive;
   });
@@ -289,6 +305,21 @@ void usercontrol(void) {
     useSensors = !useSensors;
     Controller.Screen.print("SORTING: %s", useSensors ? "YES" : "NO ");
   });
+
+  Controller.ButtonLeft.pressed([] {
+    chassis.drive_distance(-2.75, chassis.get_absolute_heading(), 6, 0, 1, 100, 2000);
+    chassis.drive_stop(hold);
+    chassis.drive_stop(coast);
+
+    useSensors = false;
+    Controller.Screen.setCursor(4, 1);
+    Controller.Screen.clearLine(4);
+    Controller.Screen.print("SORTING: %s", useSensors ? "YES" : "NO ");
+  });
+
+  // Controller.ButtonX.pressed([] {
+  //   chassis.drive_distance(-1, chassis.get_absolute_heading(), 6, 0, 0.5, 100, 2000);
+  // });
 
   Controller.Screen.setCursor(1, 1);
   Controller.Screen.clearLine();
@@ -314,10 +345,23 @@ void usercontrol(void) {
     if(!intakeCommand) {
 
       if(Controller.ButtonR1.pressing()) {
-        intakeStore(useSensors, allColor);
+        if(Controller.ButtonR2.pressing()) {
+          intakeMotors.stop();
+          antler.close();
+        }
+        else {
+          intakeStore(useSensors, allColor);
+        }
       }
       else if(Controller.ButtonR2.pressing() ) {
-        outtake();
+        chassis.DriveR.setStopping(hold);
+        chassis.DriveL.setStopping(hold);
+        if(Controller.ButtonX.pressing()) {
+          outtake(true);
+        }
+        else {
+          outtake(false);
+        }
       }
       else if(Controller.ButtonL1.pressing()) {
         //Score in top
@@ -329,8 +373,22 @@ void usercontrol(void) {
       }
       else {
         intakeMotors.stop();
+        chassis.DriveR.setStopping(coast);
+        chassis.DriveL.setStopping(coast);
+        antler.open();
       }
 
+    }
+
+    if(Controller.ButtonY.pressing()) {
+      matchload.open();
+    }
+    else {
+      matchload.close();
+    }
+
+    if(Controller.ButtonA.pressing()) {
+      agitator.spin(reverse, 100, pct);
     }
 
 
@@ -341,11 +399,13 @@ void usercontrol(void) {
   }
 }
 
+
 //
 // Main will set up the competition functions and callbacks.
 //
 int main() {
   // Set up callbacks for autonomous and driver control periods.
+  // thread agitatorThread = thread(agitatorJam);
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 

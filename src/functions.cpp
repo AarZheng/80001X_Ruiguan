@@ -23,7 +23,7 @@ int autoScore(void *isBlue) {
 
 void intakeStore(bool sort, bool isBlue) {
   if(sort && 
-  ((isBlue == true && colorSorter.hue() > 0 && colorSorter.hue() < 30) || 
+  ((isBlue == true && colorSorter.hue() > 0 && colorSorter.hue() < 20) || 
   (isBlue == false && colorSorter.hue() > 180 && colorSorter.hue() < 240))) {
     intakeCommand = true;
     hood.open();
@@ -32,6 +32,7 @@ void intakeStore(bool sort, bool isBlue) {
     intakeTop.spin(fwd, 100, pct);
     wait(250, msec);
     intakeCommand = false;
+    printf("Sorted");
   }
   else {
     hood.close();
@@ -45,11 +46,19 @@ void intakeStore(bool isBlue) {
   intakeStore(true, isBlue);
 }
 
-void outtake() {
-  intakeFront.spin(reverse, 50, pct);
-  intakeBack.spin(fwd, 50, pct);
-  intakeTop.spin(reverse, 75, pct);
-  agitator.spin(fwd, 75, pct);
+void outtake(bool slowed) {
+  if(slowed) {
+    intakeFront.spin(reverse, 50 * 0.75, pct);
+    intakeBack.spin(fwd, 33 * 0.75, pct);
+    intakeTop.spin(reverse, 33 * 0.75, pct);
+    agitator.spin(fwd, 20 * 0.75, pct);
+  }
+  else {
+    intakeFront.spin(reverse, 100, pct);
+    intakeBack.spin(fwd, 67, pct);
+    intakeTop.spin(reverse, 100, pct);
+    agitator.spin(fwd, 75, pct);
+  }
 }
 
 void intakeScoreTop(bool sort, bool isBlue) {
@@ -98,28 +107,32 @@ float sensorFilter(distance sensor, float odomValue, bool negative) { //Simple l
 
   if(sensor.objectDistance(inches) == frontDist.objectDistance(inches)) {
     sensorValue = frontDist.objectDistance(inches) + 6;
+    printf("Sensor selection: front");
   }
   else if(sensor.objectDistance(inches) == backDist.objectDistance(inches)) {
     sensorValue = backDist.objectDistance(inches) + 7;
+    printf("Sensor selection: back");
   }
   else if(sensor.objectDistance(inches) == leftDist.objectDistance(inches)){
     sensorValue = leftDist.objectDistance(inches) + 6.5;
+    printf("Sensor selection: left");
   }
   else {
     sensorValue = rightDist.objectDistance(inches) + 6.5;
+    printf("Sensor selection: right");
   }
 
   printf("Sensor value: %f\n", sensorValue);
 
-  if(!negative && fabs((72 - sensorValue - odomValue) / odomValue) < 0.3) { //Distance sensor reading is somewhat similar to odom estimation
+  if(!negative && fabs((72 - sensorValue - odomValue) / odomValue) < 0.4) { //Distance sensor reading is somewhat similar to odom estimation
     return 72 - sensorValue;
   }
-  else if(negative && fabs((-72 + sensorValue - odomValue) / odomValue) < 0.3) {
+  else if(negative && fabs((-72 + sensorValue - odomValue) / odomValue) < 0.4) {
     return -72 + sensorValue;
   }
   
   else {
-    printf("ERROR: Distance failed");
+    printf("ERROR: Distance failed \n");
     printf("Sensor installed: %s\n", sensor.installed() ? "true" : "false");
     return odomValue;
   }

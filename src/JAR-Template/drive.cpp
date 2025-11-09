@@ -326,6 +326,35 @@ void Drive::drive_distance(float distance, float heading, float drive_max_voltag
   chassis.DriveR.stop();
 }
 
+
+void Drive::drive_distance_with_sensor(distance dist_sensor, float distance, float heading, float drive_max_voltage, float heading_max_voltage, float drive_settle_error, float drive_settle_time, float drive_timeout){
+  drive_distance_with_sensor(dist_sensor, distance, heading, drive_max_voltage, heading_max_voltage, drive_settle_error, drive_settle_time, drive_timeout, drive_kp, drive_ki, drive_kd, drive_starti, heading_kp, heading_ki, heading_kd, heading_starti);
+}
+
+void Drive::drive_distance_with_sensor(distance dist_sensor, float distance, float heading, float drive_max_voltage, float heading_max_voltage, float drive_settle_error, float drive_settle_time, float drive_timeout, float drive_kp, float drive_ki, float drive_kd, float drive_starti, float heading_kp, float heading_ki, float heading_kd, float heading_starti){
+  PID drivePID(distance, drive_kp, drive_ki, drive_kd, drive_starti, drive_settle_error, drive_settle_time, drive_timeout);
+  PID headingPID(reduce_negative_180_to_180(heading - get_absolute_heading()), heading_kp, heading_ki, heading_kd, heading_starti);
+  float start_average_position = -dist_sensor.objectDistance(inches);
+  float average_position = start_average_position;
+  while(drivePID.is_settled() == false){
+    average_position = -dist_sensor.objectDistance(inches);
+    float drive_error = distance+start_average_position-average_position;
+    printf("drive error: %f \n", drive_error);
+    float heading_error = reduce_negative_180_to_180(heading - get_absolute_heading());
+    float drive_output = drivePID.compute(drive_error);
+    float heading_output = headingPID.compute(heading_error);
+
+    drive_output = clamp(drive_output, -drive_max_voltage, drive_max_voltage);
+    heading_output = clamp(heading_output, -heading_max_voltage, heading_max_voltage);
+
+    drive_with_voltage(drive_output+heading_output, drive_output-heading_output);
+    task::sleep(10);
+  }
+
+  chassis.DriveL.stop();
+  chassis.DriveR.stop();
+}
+
 /**
  * Turns to a given angle with only one side of the drivetrain.
  * Like turn_to_angle(), is optimized for turning the shorter

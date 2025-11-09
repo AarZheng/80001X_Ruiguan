@@ -2,7 +2,7 @@ using namespace vex;
 #include <atomic>
 
 void intakeStore(bool sort, bool blue = true);
-void outtake();
+void outtake(bool slowed = false);
 void intakeScoreTop(bool sort, bool blue = true);
 void intakeScoreMid(double speed = 100);
 

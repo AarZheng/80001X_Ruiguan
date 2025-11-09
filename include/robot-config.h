@@ -23,6 +23,7 @@ extern motor_group intakeMotors;
 extern pneumatics matchload;
 extern pneumatics hood;
 extern pneumatics descore;
+extern pneumatics antler;
 
 extern optical colorSorter;
 extern distance frontDist;
@@ -30,8 +31,10 @@ extern distance rightDist;
 extern distance leftDist;
 extern distance backDist;
 
+
 extern bool matchloadActive;
 extern bool topScoring;
 extern bool descoreActive;
+extern bool antlerActive;
 
 void  vexcodeInit( void );
