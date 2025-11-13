@@ -95,9 +95,9 @@ void intakeScoreTop(bool isBlue) {
 }
 
 void intakeScoreMid(double speed) {
-  intakeFront.spin(fwd, speed, pct);
+  intakeFront.spin(fwd, speed * 0.4, pct);
   intakeBack.spin(fwd, speed, pct);
-  intakeTop.spin(reverse, speed, pct);
+  intakeTop.spin(reverse, speed * 0.75, pct);
   agitator.spin(fwd, speed, pct);
 }
 

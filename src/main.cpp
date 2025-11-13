@@ -147,28 +147,28 @@ void pre_auton() {
     Brain.Screen.printAt(5, 120, "Selected Auton:");
     switch(current_auton_selection){
       case 0:
-        Brain.Screen.printAt(5, 140, "Red long right");
+        Brain.Screen.printAt(5, 140, "Blue left long mid");
         break;
       case 1:
-        Brain.Screen.printAt(5, 140, "Blue long right");
+        Brain.Screen.printAt(5, 140, "Red left long mid");
         break;
       case 2:
-        Brain.Screen.printAt(5, 140, "Blue long left");
+        Brain.Screen.printAt(5, 140, "Blue right long mid");
         break;
       case 3:
-        Brain.Screen.printAt(5, 140, "Blue long right");
+        Brain.Screen.printAt(5, 140, "Red right long mid");
         break;
       case 4:
-        Brain.Screen.printAt(5, 140, "Red center right");
+        Brain.Screen.printAt(5, 140, "Blue SAWP");
         break;
       case 5:
-        Brain.Screen.printAt(5, 140, "Blue center right");
-        break;
-      case 6:
         Brain.Screen.printAt(5, 140, "Red SAWP");
         break;
+      case 6:
+        Brain.Screen.printAt(5, 140, "Blue long");
+        break;
       case 7:
-        Brain.Screen.printAt(5, 140, "Blue SAWP");
+        Brain.Screen.printAt(5, 140, "Red long");
         break;
     }
     if(Brain.Screen.pressing()){
@@ -194,35 +194,31 @@ void autonomous(void) {
   auto_started = true;
   switch(current_auton_selection){ 
     case 0:
-      allColor = false;
-      // sawp(allColor); 
-      leftMidCenter(allColor);       
-      // rightLong(allColor);
-      // skills();
-      // rightCenter(allColor);
+      allColor = true;
+      // leftLong(allColor);
+      leftMidCenter(allColor);  
+      // sawp(allColor);     
       // odom_test();
-      // temp(allColor);
-      // printf("gurt");
       break;
     case 1:
-      allColor = true;         
-      rightLong(allColor);
+      allColor = false;
+      leftMidCenter(allColor);
       break;
     case 2:
-      allColor = true;
-      leftLong(allColor);
+      allColor = true;         
+      rightMidCenter(allColor);
       break;
     case 3:
-      allColor = true;
-      rightLong(allColor);
+      allColor = false;
+      rightMidCenter(allColor);
       break;
     case 4:
-      allColor = false;
-      rightCenter(allColor);
+      allColor = true;
+      sawp(allColor);
       break;
     case 5:
-      allColor = true;
-      rightCenter(allColor);
+      allColor = false;
+      sawp(allColor);
       break;
     case 6:
       allColor = false;
@@ -307,7 +303,7 @@ void usercontrol(void) {
   });
 
   Controller.ButtonLeft.pressed([] {
-    chassis.drive_distance(-2.75, chassis.get_absolute_heading(), 6, 0, 1, 100, 2000);
+    chassis.drive_distance(-4, chassis.get_absolute_heading(), 6, 0, 1, 100, 2000);
     chassis.drive_stop(hold);
     chassis.drive_stop(coast);
 
@@ -369,6 +365,8 @@ void usercontrol(void) {
       }
       else if(Controller.ButtonL2.pressing()) {
         //Score in middle
+        descore.close();
+        descoreActive = true;
         intakeScoreMid(50);
       }
       else {
