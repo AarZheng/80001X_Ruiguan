@@ -48,16 +48,16 @@ void intakeStore(bool isBlue) {
 
 void outtake(bool slowed) {
   if(slowed) {
-    intakeFront.spin(reverse, 50 * 0.75, pct);
-    intakeBack.spin(fwd, 33 * 0.75, pct);
-    intakeTop.spin(reverse, 33 * 0.75, pct);
-    agitator.spin(fwd, 20 * 0.75, pct);
+    intakeFront.spin(reverse, 33, pct);
+    intakeBack.spin(fwd, 33, pct);
+    intakeTop.spin(reverse, 33, pct);
+    agitator.spin(fwd, 20, pct);
   }
   else {
-    intakeFront.spin(reverse, 100, pct);
-    intakeBack.spin(fwd, 67, pct);
-    intakeTop.spin(reverse, 100, pct);
-    agitator.spin(fwd, 75, pct);
+    intakeFront.spin(reverse, 100 * 0.8, pct);
+    intakeBack.spin(fwd, 67 * 0.8, pct);
+    intakeTop.spin(reverse, 100 * 0.8, pct);
+    agitator.spin(fwd, 75 * 0.8, pct);
   }
 }
 

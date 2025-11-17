@@ -195,8 +195,9 @@ void autonomous(void) {
   switch(current_auton_selection){ 
     case 0:
       allColor = true;
+      skills();
       // leftLong(allColor);
-      leftMidCenter(allColor);  
+      // leftMidCenter(allColor);  
       // sawp(allColor);     
       // odom_test();
       break;
@@ -303,7 +304,7 @@ void usercontrol(void) {
   });
 
   Controller.ButtonLeft.pressed([] {
-    chassis.drive_distance(-4, chassis.get_absolute_heading(), 6, 0, 1, 100, 2000);
+    chassis.drive_distance(-3.5, chassis.get_absolute_heading(), 6, 0, 1, 100, 2000);
     chassis.drive_stop(hold);
     chassis.drive_stop(coast);
 
