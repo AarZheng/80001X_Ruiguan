@@ -732,7 +732,7 @@ void Drive::holonomic_drive_to_pose(float X_position, float Y_position, float an
 // }
 
 float Pilons(float input){
-  float t = 3;
+  float t = 2;
   return(exp((fabs(input)-100)*(t)/1000)*input);
 }
 

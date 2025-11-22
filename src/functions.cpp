@@ -20,21 +20,33 @@ int autoScore(void *isBlue) {
   return 0;
 }
 
+static uint32_t ejectEndTime = 0;
 
 void intakeStore(bool sort, bool isBlue) {
-  if(sort && 
-  ((isBlue == true && colorSorter.hue() > 0 && colorSorter.hue() < 20) || 
-  (isBlue == false && colorSorter.hue() > 180 && colorSorter.hue() < 240))) {
+
+  // Detect wrong color
+  bool wrongColor =
+    (sort &&
+    ((isBlue && colorSorter.hue() > 0   && colorSorter.hue() < 16) ||
+     (!isBlue && colorSorter.hue() > 180 && colorSorter.hue() < 240)));
+
+  // If wrong color is detected again, extend the ejection duration
+  if (wrongColor) {
+    ejectEndTime = Brain.Timer.time(msec) + 200;  // extend by 250ms
     intakeCommand = true;
+    printf("Sorted: %f\n", colorSorter.hue());
+  }
+
+  // If currently in ejection period, keep ejecting
+  if (Brain.Timer.time(msec) < ejectEndTime) {
     hood.open();
     intakeFront.spin(fwd, 100, pct);
     intakeBack.spin(fwd, 100, pct);
     intakeTop.spin(fwd, 100, pct);
-    wait(250, msec);
-    intakeCommand = false;
-    printf("Sorted");
   }
   else {
+    // Normal intake mode
+    intakeCommand = false;
     hood.close();
     intakeFront.spin(fwd, 100, pct);
     intakeBack.spin(fwd, 100, pct);
@@ -42,22 +54,43 @@ void intakeStore(bool sort, bool isBlue) {
   }
 }
 
+// void intakeStore(bool sort, bool isBlue) {
+//   if(sort && 
+//   ((isBlue == true && colorSorter.hue() > 0 && colorSorter.hue() < 16) || 
+//   (isBlue == false && colorSorter.hue() > 180 && colorSorter.hue() < 240))) { //Detects if the color sensor sees the wrong color of ball
+//     intakeCommand = true; //Flag to prevent other intake commands
+//     hood.open(); //Opens hood to eject wrong color ball
+//     intakeFront.spin(fwd, 100, pct);
+//     intakeBack.spin(fwd, 100, pct);
+//     intakeTop.spin(fwd, 100, pct);
+//     wait(250, msec); //Time to eject wrong color ball
+//     intakeCommand = false;
+//     printf("Sorted: %f", colorSorter.hue());
+//   }
+//   else {
+//     hood.close(); //Intake into basket
+//     intakeFront.spin(fwd, 100, pct);
+//     intakeBack.spin(fwd, 100, pct);
+//     intakeTop.spin(fwd, 100, pct);
+//   }
+// }
+
 void intakeStore(bool isBlue) {
   intakeStore(true, isBlue);
 }
 
 void outtake(bool slowed) {
   if(slowed) {
-    intakeFront.spin(reverse, 33, pct);
-    intakeBack.spin(fwd, 33, pct);
-    intakeTop.spin(reverse, 33, pct);
-    agitator.spin(fwd, 20, pct);
+    intakeFront.spin(reverse, 40, pct);
+    intakeBack.spin(fwd, 40, pct);
+    intakeTop.spin(reverse, 40, pct);
+    agitator.spin(fwd, 15, pct);
   }
   else {
-    intakeFront.spin(reverse, 100 * 0.8, pct);
-    intakeBack.spin(fwd, 67 * 0.8, pct);
-    intakeTop.spin(reverse, 100 * 0.8, pct);
-    agitator.spin(fwd, 75 * 0.8, pct);
+    intakeFront.spin(reverse, 100 * 0.7, pct);
+    intakeBack.spin(fwd, 67 * 0.7, pct);
+    intakeTop.spin(reverse, 100 * 0.7, pct);
+    agitator.spin(fwd, 70 * 0.7, pct);
   }
 }
 
@@ -101,42 +134,93 @@ void intakeScoreMid(double speed) {
   agitator.spin(fwd, speed, pct);
 }
 
-float sensorFilter(distance sensor, float odomValue, bool negative) { //Simple low-pass filter to remove inconsistent values
+// float sensorFilter(distance sensor, float odomValue, bool negative) { //Simple low-pass filter to remove inconsistent values
+
+//   float sensorValue;
+
+//   if(sensor.objectDistance(inches) == frontDist.objectDistance(inches)) {
+//     sensorValue = frontDist.objectDistance(inches) + 6;
+//     printf("Sensor selection: front");
+//   }
+//   else if(sensor.objectDistance(inches) == backDist.objectDistance(inches)) {
+//     sensorValue = backDist.objectDistance(inches) + 7;
+//     printf("Sensor selection: back");
+//   }
+//   else if(sensor.objectDistance(inches) == leftDist.objectDistance(inches)){
+//     sensorValue = leftDist.objectDistance(inches) + 6.5;
+//     printf("Sensor selection: left");
+//   }
+//   else {
+//     sensorValue = rightDist.objectDistance(inches) + 6.5;
+//     printf("Sensor selection: right");
+//   }
+
+//   printf("Sensor value: %f\n", sensorValue);
+
+//   if(!negative && fabs((72 - sensorValue - odomValue) / odomValue) < 0.4) { //Distance sensor reading is somewhat similar to odom estimation
+//     return 72 - sensorValue;
+//   }
+//   else if(negative && fabs((-72 + sensorValue - odomValue) / odomValue) < 0.4) {
+//     return -72 + sensorValue;
+//   }
+  
+//   else {
+//     printf("ERROR: Distance failed \n");
+//     printf("Sensor installed: %s\n", sensor.installed() ? "true" : "false");
+//     return odomValue;
+//   }
+// }
+
+float correctedDistance(float rawDist, float robotHeading, float expectedHeading) {
+    float angleError = (robotHeading - expectedHeading) * M_PI / 180.0; // radians
+    return rawDist * cos(angleError);
+}
+
+float sensorFilter(distance sensor, float odomValue, bool negative) {
 
   float sensorValue;
 
+  // Select which sensor is being used & apply offset
   if(sensor.objectDistance(inches) == frontDist.objectDistance(inches)) {
     sensorValue = frontDist.objectDistance(inches) + 6;
-    printf("Sensor selection: front");
+    printf("Sensor selection: front\n");
   }
   else if(sensor.objectDistance(inches) == backDist.objectDistance(inches)) {
     sensorValue = backDist.objectDistance(inches) + 7;
-    printf("Sensor selection: back");
+    printf("Sensor selection: back\n");
   }
   else if(sensor.objectDistance(inches) == leftDist.objectDistance(inches)){
     sensorValue = leftDist.objectDistance(inches) + 6.5;
-    printf("Sensor selection: left");
+    printf("Sensor selection: left\n");
   }
   else {
     sensorValue = rightDist.objectDistance(inches) + 6.5;
-    printf("Sensor selection: right");
+    printf("Sensor selection: right\n");
   }
 
-  printf("Sensor value: %f\n", sensorValue);
+  // Expected cardinal heading (robot snaps to nearest 90°)
+  int expectedHeading = std::round(chassis.get_absolute_heading() / 90.0) * 90;
+  float robotHeading = chassis.get_absolute_heading();
 
-  if(!negative && fabs((72 - sensorValue - odomValue) / odomValue) < 0.4) { //Distance sensor reading is somewhat similar to odom estimation
-    return 72 - sensorValue;
+  // Apply trig correction
+  float corrected = correctedDistance(sensorValue, robotHeading, expectedHeading);
+
+  printf("Raw sensor: %f | Corrected: %f\n", sensorValue, corrected);
+
+  // Original consistency check, but using corrected distance
+  if(!negative && fabs((72 - corrected - odomValue) / odomValue) < 0.4) {
+    return 72 - corrected;
   }
-  else if(negative && fabs((-72 + sensorValue - odomValue) / odomValue) < 0.4) {
-    return -72 + sensorValue;
+  else if(negative && fabs((-72 + corrected - odomValue) / odomValue) < 0.4) {
+    return -72 + corrected;
   }
-  
   else {
     printf("ERROR: Distance failed \n");
     printf("Sensor installed: %s\n", sensor.installed() ? "true" : "false");
     return odomValue;
   }
 }
+
 
 void distanceReset(int quadrant) {
   if(quadrant == 0) { //auto-select quadrant
@@ -163,6 +247,7 @@ void distanceReset(int quadrant) {
   int resetAngle = std::round(chassis.get_absolute_heading() / 90.0);
   if(resetAngle == 360) resetAngle = 0;
   printf("Heading detected as: %i\n", resetAngle * 90);
+  printf("Actual heading: %f\n", chassis.get_absolute_heading());
 
   printf("Position updated from: X = %f, Y = %f\n", chassis.get_X_position(), chassis.get_Y_position());
 

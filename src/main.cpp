@@ -79,7 +79,7 @@ PORT21,
 
 //Gyro scale, this is what your gyro reads when you spin the robot 360 degrees.
 //For most cases 360 will do fine here, but this scale factor can be very helpful when precision is necessary.
-358.1,
+358.9,
 
 /*---------------------------------------------------------------------------*/
 /*                                  PAUSE!                                   */
@@ -165,10 +165,19 @@ void pre_auton() {
         Brain.Screen.printAt(5, 140, "Red SAWP");
         break;
       case 6:
-        Brain.Screen.printAt(5, 140, "Blue long");
+        Brain.Screen.printAt(5, 140, "Blue right long");
         break;
       case 7:
-        Brain.Screen.printAt(5, 140, "Red long");
+        Brain.Screen.printAt(5, 140, "Red right long");
+        break;
+      case 8:
+        Brain.Screen.printAt(5, 140, "Blue left long");
+        break;
+      case 9:
+        Brain.Screen.printAt(5, 140, "Blue left long");
+        break;
+      case 10:
+        Brain.Screen.printAt(5, 140, "Skill");
         break;
     }
     if(Brain.Screen.pressing()){
@@ -194,24 +203,21 @@ void autonomous(void) {
   auto_started = true;
   switch(current_auton_selection){ 
     case 0:
-      allColor = true;
+      // allColor = true;
+      // leftCenterLong(allColor);
       skills();
-      // leftLong(allColor);
-      // leftMidCenter(allColor);  
-      // sawp(allColor);     
-      // odom_test();
       break;
     case 1:
       allColor = false;
-      leftMidCenter(allColor);
+      leftCenterLong(allColor);
       break;
     case 2:
       allColor = true;         
-      rightMidCenter(allColor);
+      rightCenterLong(allColor);
       break;
     case 3:
       allColor = false;
-      rightMidCenter(allColor);
+      rightCenterLong(allColor);
       break;
     case 4:
       allColor = true;
@@ -222,12 +228,24 @@ void autonomous(void) {
       sawp(allColor);
       break;
     case 6:
-      allColor = false;
-      sawp(allColor);
+      allColor = true;
+      rightLong(allColor);
       break;
     case 7:
+      allColor = false;
+      rightLong(allColor);
+      break;
+    case 8:
       allColor = true;
-      sawp(allColor);
+      leftLong(allColor);
+      break;
+    case 9:
+      allColor = false;
+      leftLong(allColor);
+      break;
+    case 10:
+      allColor = true;
+      skills();
       break;
  }
 }
@@ -268,16 +286,6 @@ void usercontrol(void) {
   intakeThread.interrupt();
   isAuto = false;
 
-  // Controller.ButtonY.pressed([] {
-  //   if(!matchloadActive) {
-  //     matchload.open();
-  //   }
-  //   else {
-  //     matchload.close();
-  //   }
-  //   matchloadActive = !matchloadActive;
-  // });
-
   Controller.ButtonRight.pressed([] {
     if(!descoreActive) {
       descore.close();
@@ -314,9 +322,12 @@ void usercontrol(void) {
     Controller.Screen.print("SORTING: %s", useSensors ? "YES" : "NO ");
   });
 
-  // Controller.ButtonX.pressed([] {
-  //   chassis.drive_distance(-1, chassis.get_absolute_heading(), 6, 0, 0.5, 100, 2000);
-  // });
+  Controller.ButtonX.pressed([] {
+    useSensors = false;
+    Controller.Screen.setCursor(4, 1);
+    Controller.Screen.clearLine(4);
+    Controller.Screen.print("SORTING: %s", useSensors ? "YES" : "NO ");
+  });
 
   Controller.Screen.setCursor(1, 1);
   Controller.Screen.clearLine();
@@ -362,13 +373,22 @@ void usercontrol(void) {
       }
       else if(Controller.ButtonL1.pressing()) {
         //Score in top
+        chassis.DriveR.setStopping(hold);
+        chassis.DriveL.setStopping(hold);
         intakeScoreTop(useSensors, allColor);
       }
       else if(Controller.ButtonL2.pressing()) {
         //Score in middle
+        chassis.DriveR.setStopping(hold);
+        chassis.DriveL.setStopping(hold);
         descore.close();
         descoreActive = true;
-        intakeScoreMid(50);
+        if(Controller.ButtonX.pressing()) {
+          intakeScoreMid(40);
+        }
+        else {
+          intakeScoreMid(50);
+        }
       }
       else {
         intakeMotors.stop();
