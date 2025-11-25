@@ -70,7 +70,7 @@ motor_group(rightBack, rightMid, rightFront),
 PORT21,
 
 //Input your wheel diameter. (4" omnis are actually closer to 4.125"):
-2.80,
+2.88936,
 
 //External ratio, must be in decimal, in the format of input teeth/output teeth.
 //If your motor has an 84-tooth gear and your wheel has a 60-tooth gear, this value will be 1.4.
@@ -159,31 +159,37 @@ void pre_auton() {
         Brain.Screen.printAt(5, 140, "Red right long mid");
         break;
       case 4:
-        Brain.Screen.printAt(5, 140, "Blue SAWP");
+        Brain.Screen.printAt(5, 140, "Blue left SAWP");
         break;
       case 5:
-        Brain.Screen.printAt(5, 140, "Red SAWP");
+        Brain.Screen.printAt(5, 140, "Red left SAWP");
         break;
       case 6:
-        Brain.Screen.printAt(5, 140, "Blue right long");
+        Brain.Screen.printAt(5, 140, "Blue right SAWP");
         break;
       case 7:
-        Brain.Screen.printAt(5, 140, "Red right long");
+        Brain.Screen.printAt(5, 140, "Red right SAWP");
         break;
       case 8:
-        Brain.Screen.printAt(5, 140, "Blue left long");
+        Brain.Screen.printAt(5, 140, "Blue right long");
         break;
       case 9:
-        Brain.Screen.printAt(5, 140, "Blue left long");
+        Brain.Screen.printAt(5, 140, "Red right long");
         break;
       case 10:
-        Brain.Screen.printAt(5, 140, "Skill");
+        Brain.Screen.printAt(5, 140, "Blue left long");
+        break;
+      case 11:
+        Brain.Screen.printAt(5, 140, "Blue left long");
+        break;
+      case 12:
+        Brain.Screen.printAt(5, 140, "Skills");
         break;
     }
     if(Brain.Screen.pressing()){
       while(Brain.Screen.pressing()) {}
       current_auton_selection ++;
-    } else if (current_auton_selection == 8){
+    } else if (current_auton_selection == 13) {
       current_auton_selection = 0;
     }
     task::sleep(10);
@@ -203,9 +209,8 @@ void autonomous(void) {
   auto_started = true;
   switch(current_auton_selection){ 
     case 0:
-      // allColor = true;
-      // leftCenterLong(allColor);
-      skills();
+      allColor = true;
+      leftCenterLong(allColor);
       break;
     case 1:
       allColor = false;
@@ -221,29 +226,37 @@ void autonomous(void) {
       break;
     case 4:
       allColor = true;
-      sawp(allColor);
+      sawpLeft(allColor);
       break;
     case 5:
       allColor = false;
-      sawp(allColor);
+      sawpLeft(allColor);
       break;
     case 6:
       allColor = true;
-      rightLong(allColor);
+      sawpRight(allColor);
       break;
     case 7:
       allColor = false;
-      rightLong(allColor);
+      sawpRight(allColor);
       break;
     case 8:
       allColor = true;
-      leftLong(allColor);
+      rightLong(allColor);
       break;
     case 9:
       allColor = false;
-      leftLong(allColor);
+      rightLong(allColor);
       break;
     case 10:
+      allColor = true;
+      leftLong(allColor);
+      break;
+    case 11:
+      allColor = false;
+      leftLong(allColor);
+      break;
+    case 12:
       allColor = true;
       skills();
       break;
@@ -280,11 +293,14 @@ void usercontrol(void) {
   antler.open();
   descore.open();
   Controller.Screen.clearScreen();
+  
 
   chassis.DriveR.setStopping(coast);
   chassis.DriveL.setStopping(coast);
   intakeThread.interrupt();
   isAuto = false;
+  Brain.resetTimer();
+  ejectEndTime = 0;
 
   Controller.ButtonRight.pressed([] {
     if(!descoreActive) {
@@ -309,6 +325,11 @@ void usercontrol(void) {
     Controller.Screen.clearLine(4);
     useSensors = !useSensors;
     Controller.Screen.print("SORTING: %s", useSensors ? "YES" : "NO ");
+
+    intakeThread.interrupt();
+    isAuto = false;
+    Brain.resetTimer();
+    ejectEndTime = 0;
   });
 
   Controller.ButtonLeft.pressed([] {
@@ -424,7 +445,7 @@ void usercontrol(void) {
 //
 int main() {
   // Set up callbacks for autonomous and driver control periods.
-  // thread agitatorThread = thread(agitatorJam);
+  thread agitatorThread = thread(agitatorJam);
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 

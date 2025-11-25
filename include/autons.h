@@ -22,7 +22,8 @@ void leftCenterLong(bool allColor);
 void rightCenterLong(bool allColor);
 void leftCenter(bool allColor);
 void rightCenter(bool allColor);
-void sawp(bool allColor);
+void sawpLeft(bool allColor);
+void sawpRight(bool allColor);
 void temp(bool allColor);
 void skills();
 

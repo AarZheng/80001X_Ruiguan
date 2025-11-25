@@ -7,9 +7,13 @@ void intakeScoreTop(bool sort, bool blue = true);
 void intakeScoreMid(double speed = 100);
 
 static bool intakeCommand = false;
-static bool isAuto = true;
+static bool isAuto = false;
 
 int autoIntake(void* isBlue);
 int autoScore(void* isBlue);
+int agitatorAntiJam();
 
 void distanceReset(int quadrant);
+void antiJamUpdate(motor &m);
+
+static uint32_t ejectEndTime = 0;

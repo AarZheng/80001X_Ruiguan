@@ -20,21 +20,80 @@ int autoScore(void *isBlue) {
   return 0;
 }
 
-static uint32_t ejectEndTime = 0;
+int agitatorAntiJam() {
+  while(true) {
+
+    antiJamUpdate(agitator);   // anti-jam logic runs here
+
+    wait(25, msec);
+  }
+}
+
+// SETTINGS
+float JAM_CURRENT = 1.5;       // Amps that indicate a jam (tune this per motor)
+float JAM_VELOCITY = 5;        // RPM threshold that counts as "not spinning"
+int JAM_DEBOUNCE = 150;        // ms motor must be jammed before reversing
+int UNJAM_TIME = 800;          // ms to reverse and clear the jam
+int UNJAM_SPEED = -100;         // reverse speed during unjam
+int NORMAL_SPEED = 100;        // forward speed during normal operation
+
+// STATE VARIABLES
+int jamStartTime = 0;
+bool isUnjamming = false;
+int unjamEndTime = 0;
+
+void antiJamUpdate(motor &m) {
+    int now = vex::timer::system();
+    
+    float vel = m.velocity(rpm);
+    float current = m.current(amp);
+
+    // 1. If we are unjamming
+    if (isUnjamming) {
+        if (now >= unjamEndTime) {
+            // Stop unjamming → return to normal control
+            isUnjamming = false;
+        }
+        return;
+    }
+
+    // 2. Check if motor is jammed
+    bool velocityLow = fabs(vel) < JAM_VELOCITY;
+    bool currentHigh = current > JAM_CURRENT;
+    bool commandedForward = m.isSpinning();  // motor was told to move
+
+    if (commandedForward && velocityLow && currentHigh) {
+        // Start counting jam duration
+        if (jamStartTime == 0)
+            jamStartTime = now;
+
+        // Jam sustained long enough → trigger unjam
+        if (now - jamStartTime > JAM_DEBOUNCE) {
+            isUnjamming = true;
+            unjamEndTime = now + UNJAM_TIME;
+
+            m.spin(fwd, UNJAM_SPEED, pct); // reverse the motor
+            printf("Motor jam detected → reversing\n");
+        }
+    } else {
+        // No jam
+        jamStartTime = 0;
+    }
+}
 
 void intakeStore(bool sort, bool isBlue) {
 
   // Detect wrong color
   bool wrongColor =
     (sort &&
-    ((isBlue && colorSorter.hue() > 0   && colorSorter.hue() < 16) ||
+    ((isBlue && colorSorter.hue() > 0 && colorSorter.hue() < 16) ||
      (!isBlue && colorSorter.hue() > 180 && colorSorter.hue() < 240)));
 
   // If wrong color is detected again, extend the ejection duration
   if (wrongColor) {
     ejectEndTime = Brain.Timer.time(msec) + 200;  // extend by 250ms
     intakeCommand = true;
-    printf("Sorted: %f\n", colorSorter.hue());
+    // printf("Sorted: %f\n", colorSorter.hue());
   }
 
   // If currently in ejection period, keep ejecting
@@ -87,10 +146,10 @@ void outtake(bool slowed) {
     agitator.spin(fwd, 15, pct);
   }
   else {
-    intakeFront.spin(reverse, 100 * 0.7, pct);
-    intakeBack.spin(fwd, 67 * 0.7, pct);
-    intakeTop.spin(reverse, 100 * 0.7, pct);
-    agitator.spin(fwd, 70 * 0.7, pct);
+    intakeFront.spin(reverse, 100, pct);
+    intakeBack.spin(fwd, 67, pct);
+    intakeTop.spin(reverse, 100, pct);
+    agitator.spin(fwd, 70, pct);
   }
 }
 

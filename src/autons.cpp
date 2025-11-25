@@ -26,34 +26,36 @@ void skills() {
   descore.open();
   chassis.set_coordinates(-60, 36, 0);
   intakeStore(false);
-  chassis.drive_distance_with_sensor(frontDist, 55, -3, 10, 6, 4, 50, 4000); //Drives across park and gets balls
+  chassis.drive_distance_with_sensor(frontDist, 55, -3, 9, 6, 4, 50, 3500); //Drives across park and gets balls
 
   
   chassis.turn_to_angle(90);
-  chassis.set_coordinates(-72 + (backDist.objectDistance(inches) + 7), 72 - (leftDist.objectDistance(inches) + 6.5), chassis.get_absolute_heading()); //Sets coordinates using distance sensors
+  chassis.set_coordinates(-59, 31, chassis.get_absolute_heading());
+  // chassis.set_coordinates(-72 + (backDist.objectDistance(inches) + 7), 72 - (leftDist.objectDistance(inches) + 6.5), chassis.get_absolute_heading()); //Sets coordinates using distance sensors
+  distanceReset(0);
   printf("Chassis coord: %f \n  %f", chassis.get_X_position(), chassis.get_Y_position());
   intakeThread = thread(autoIntake, &allColor);
-  chassis.turn_to_point(-24, 24);
+  chassis.turn_to_point(-24, 23);
   chassis.drive_distance(14, chassis.get_absolute_heading(), 8, 6, 4, 0, 2000);
-  chassis.drive_to_point(-17, 25, 0, 4, 6, 2, 50, 2000);  //Gets 4 stack
-  chassis.drive_to_point(-28, 24, 0, 4, 0, 2, 50, 2000);
+  chassis.drive_to_point(-17, 23, 0, 2, 6, 2, 50, 2000);  //Gets 4 stack
+  chassis.drive_to_point(-28, 23, 0, 4, 0, 2, 50, 2000);
   chassis.drive_stop(hold);
-  wait(1000, msec);
+  // wait(1000, msec);
   chassis.turn_to_point(0, 0);
   descore.close();
   matchload.open();
-  chassis.drive_to_point(0, 0, 0, 3, 1, 0, 0, 1500);
+  chassis.drive_to_point(0, 0, 0, 5, 1, 0, 0, 1000);
   chassis.turn_to_angle(135);
   chassis.drive_stop(hold);
   intakeThread.interrupt();
   intakeMotors.stop();
-  intakeScoreMid(50); //Scores 7 in upper mid
-  wait(2750, msec);
-  intakeScoreMid(30);
-  wait(2500, msec);
+  intakeScoreMid(55); //Scores 7 in upper mid
+  wait(2250, msec);
+  intakeScoreMid(35);
+  wait(2000, msec);
   
   intakeMotors.stop();
-  chassis.drive_to_point(-48, 45, 0, 10, 6, 8, 0, 2000);
+  chassis.drive_to_point(-48, 48, 0, 10, 6, 8, 0, 2000);
 
   descore.open(); 
   hood.close();
@@ -87,15 +89,16 @@ void skills() {
   chassis.drive_distance(3, chassis.get_absolute_heading(), 7, 2, -1, 0, 800);
   chassis.drive_distance(-3);
   chassis.drive_distance(3, chassis.get_absolute_heading(), 7, 2, -1, 0, 800);
-  chassis.drive_to_point(48, 48, 0, 8, 6, 6, 0, 2000);
+  chassis.drive_to_point(52, 48, 0, 8, 6, 6, 0, 2000);
   matchload.close();
   chassis.turn_to_angle(-90);
+  printf("About to score in long #1 \n");
   distanceReset(0);
   intakeThread.interrupt();
   intakeMotors.stop();
   intakeThread = thread(autoScore, &allColor); //Scores 15 into long #1
-  chassis.drive_to_point(-24, 48, 0, 4, 6, 0, 200, 3000);
-  wait(2500, msec);
+  chassis.drive_to_point(-10, 50, 0, 8, 6, 0, 200, 1000);
+  wait(3500, msec);
   chassis.drive_distance(-10);
   intakeThread.interrupt();
   intakeMotors.stop();
@@ -131,23 +134,24 @@ void skills() {
   chassis.drive_distance(3, chassis.get_absolute_heading(), 7, 2, -1, 0, 800);
   chassis.drive_distance(-3);
   chassis.drive_distance(3, chassis.get_absolute_heading(), 7, 2, -1, 0, 800);
-  chassis.drive_to_point(-48, -48, 0, 8, 6, 6, 0, 2000);
+  chassis.drive_to_point(-52, -48, 0, 8, 6, 6, 0, 2000);
   matchload.close();
   chassis.turn_to_angle(90);
+  printf("About to score in long #2 \n");
   distanceReset(0);
   intakeThread.interrupt();
   intakeMotors.stop();
   intakeThread = thread(autoScore, &allColor); //Scores 15 into long for last time
 
-  chassis.drive_to_point(-24, -48, 0, 4, 6, 0, 200, 3000);
-  wait(1000, msec);
+  chassis.drive_to_point(-10, -50, 0, 8, 6, 0, 200, 1000);
+  wait(3000, msec);
   chassis.drive_distance(-24);
   // chassis.turn_to_angle(90);
   // distanceReset(0);
   chassis.turn_to_point(-65, -30);
   chassis.drive_to_point(-65, -30, 4, 8, 6, 8, 50, 2000);
   // chassis.turn_to_angle(-30);
-  chassis.drive_distance(35, -10, 12, 6, 3, 50, 2000); //Park
+  chassis.drive_distance(45, -10, 12, 6, 3, 50, 2500); //Park
   // chassis.drive_distance_with_sensor(frontDist, 35, -10, 12, 6, 3, 50, 3000);
 
 
@@ -177,29 +181,27 @@ void rightCenterLong(bool allColor) {
   // chassis.turn_to_point(-21, -24);
   chassis.drive_to_point(-17, -24, 0, 5, 6, 2, 50, 2000);
   chassis.drive_to_point(-23, -24, 0, 6, 0, 2, 50, 2000);
-  chassis.turn_to_angle(90);
-  distanceReset(0);
   chassis.turn_to_point(0, 0);
-  chassis.drive_to_point(7, 7, 0, 5, 1, 0, 0, 1200);
+  chassis.drive_to_point(7, 7, 0, 6, 1, 0, 0, 1200);
   chassis.turn_to_angle(45);
   intakeThread.interrupt();
   intakeMotors.stop();
   outtake(false);
-  chassis.drive_distance(-4, chassis.get_absolute_heading(), 6, 0, 1, 100, 2000); //Back up for scoring low
+  chassis.drive_distance(-3, chassis.get_absolute_heading(), 6, 0, 1, 100, 2000); //Back up for scoring low
   chassis.drive_stop(hold);
   wait(1400, msec);
   intakeMotors.stop();
   intakeThread = thread(autoIntake, &allColor);
   chassis.drive_distance(-10, chassis.get_absolute_heading(), 12, 0, 6, 0, 2000);
-  chassis.turn_to_angle(180, 9, 1, 0, 2000);
+  chassis.turn_to_angle(180, 9, 3, 0, 2000);
   descore.open();
   distanceReset(0);
   chassis.turn_to_point(-48, -40);
-  chassis.drive_to_point(-48, -40, 0, 6, 4, 3, 50, 2000);
+  chassis.drive_to_point(-48, -40, 0, 8, 4, 3, 50, 2000);
   chassis.turn_to_angle(-90);
   distanceReset(0);
   matchload.open();
-  chassis.drive_to_point(-70, -48, 0, 5.5, 6, 0, 200, 1600); //Getting matchload balls
+  chassis.drive_to_point(-70, -48, 0, 5.5, 2, 0, 200, 1600); //Getting matchload balls
   chassis.drive_to_point(-48, -48, 0, 8, 6, 6, 0, 2000);
   matchload.close();
   chassis.turn_to_angle(90, 9, 1.5, 0, 1900);
@@ -207,8 +209,8 @@ void rightCenterLong(bool allColor) {
   intakeThread.interrupt(); 
   intakeMotors.stop();
   intakeScoreTop(false); //Run motors early for faster scoring
-  chassis.drive_to_point(-32, -48, 0, 8, 6, 6, 0, 2000);
-  chassis.drive_to_point(-24, -48, 0, 4, 6, 0, 150, 500); //Scoring in long goal
+  // chassis.drive_to_point(-32, -48, 0, 8, 6, 6, 0, 2000);
+  chassis.drive_to_point(-10, -48, 0, 4, 6, 0, 150, 2000); //Scoring in long goal
 }
 
 void leftCenterLong(bool allColor) {
@@ -255,9 +257,11 @@ void leftCenterLong(bool allColor) {
   distanceReset(0);
   intakeThread.interrupt(); 
   intakeMotors.stop();
-  intakeScoreTop(false); //Run motors early for faster scoring
-  chassis.drive_to_point(-32, 48, 0, 8, 6, 6, 0, 2000);
-  chassis.drive_to_point(-24, 48, 0, 4, 6, 0, 150, 500); //Scoring in long goal
+  intakeScoreTop(false); 
+  // printf("Desired heading: %f \n", reduce_negative_180_to_180(to_deg(atan2(48 - chassis.get_Y_position(), -10 - chassis.get_X_position()))) - chassis.get_absolute_heading());
+  // printf("Actual heading: %f \n", chassis.get_absolute_heading());
+  chassis.drive_to_point(-10, 48, 0, 8, 4, 6, 0, 2000);
+
 }
 
 void leftLong(bool allColor) {
@@ -349,8 +353,85 @@ void temp(bool allColor) {
   intakeThread = thread(autoIntake, &allColor);
 }
 
+void sawpRight(bool allColor) {
+  descore.open();
+  antler.open();
+  isAuto = true;
+  odom_constants();
+  Brain.resetTimer();
+  while(chassis.Gyro.isCalibrating()) {
+      wait(20, msec);
+  }
+
+  intakeThread = thread(autoIntake, &allColor);
+  
+  chassis.set_coordinates(-49, -17, 180);
+  chassis.drive_to_point(-48, -48, 0, 8, 6, 8, 0, 2000);
+  chassis.turn_to_angle(-90, 9, 1, 0, 2000);
+  distanceReset(0);
+  matchload.open();
+  chassis.drive_to_point(-70, -48, 0, 4.5, 2, 0, 200, 1450); //Getting matchload balls
+  chassis.drive_to_point(-51, -48, 0, 8, 8, 3, 0, 2000);
+  matchload.close();
+  chassis.turn_to_angle(90, 9, 3, 50, 1900);
+  distanceReset(0);
+  intakeThread.interrupt(); 
+  intakeMotors.stop();
+  intakeMotors.spin(fwd, 65, pct);
+  chassis.drive_to_point(-30, -48, 0, 8, 11, 4, 0, 1000);
+  intakeScoreTop(false); //Run motors early for faster scoring
+  // chassis.drive_to_point(-24, 48, 0, 4, 4, 0, 150, 500); //Scoring in long goal
+  distanceReset(0);
+  wait(900, msec);
+  intakeThread.interrupt();
+  intakeMotors.stop();
+  // intakeThread = thread(autoIntake, &allColor);
+  intakeStore(false);
+
+  chassis.drive_to_point(-48, -48, 0, 10, 6, 5, 0, 2000); //drive back and reset
+  intakeThread.interrupt();
+  intakeMotors.stop();
+  intakeThread = thread(autoIntake, &allColor);
+  chassis.turn_to_angle(90, 9, 1.5, 0, 1900);
+  distanceReset(0);
+  chassis.turn_to_point(0, 0, 0, 9, 2, 50, 2000); //Go towards middle
+
+  chassis.drive_to_point(-23, -24, 0, 6, 0, 2, 50, 2000);
+  // chassis.turn_to_point(0, 0);
+  chassis.drive_to_point(7, 7, 0, 6, 1, 0, 0, 1000);
+  intakeThread.interrupt();
+  intakeMotors.stop();
+  outtake(false);
+  chassis.turn_to_angle(45);
+  chassis.drive_distance(-3, chassis.get_absolute_heading(), 6, 0, 1, 100, 2000); //Back up for scoring low
+  chassis.drive_stop(hold);
+  wait(500, msec);
+  intakeMotors.stop();
+  intakeThread = thread(autoIntake, &allColor);
+  chassis.drive_distance(-10, chassis.get_absolute_heading(), 12, 0, 6, 0, 2000);
+  chassis.turn_to_angle(0, 9, 1, 0, 2000);
+  descore.open();
+  distanceReset(0);
+
+  intakeMotors.stop();
+  intakeThread = thread(autoIntake, &allColor);
+  chassis.drive_to_point(-24, 24, 0, 10, 6, 8, 0, 2000); //Get other 3 stack
+  chassis.drive_to_point(-40, 48, 0, 10, 6, 8, 0, 2000);
+  chassis.turn_to_angle(90, 9, 1.5, 0, 2000);
+  distanceReset(0);
+  printf("in time");
+  intakeThread.interrupt();
+  ejectEndTime = 0;
+  hood.open();
+  intakeMotors.stop();
+  intakeScoreTop(false);
+  chassis.drive_to_point(-27, 48, 0, 8, 8, 0, 150, 500);
+
+  
+}
+
 //Needs to score 10 in 3 goals, 2 blocks/goal, 3 blocks out of matchloader
-void sawp(bool allColor) {
+void sawpLeft(bool allColor) {
   descore.open();
   antler.open();
   isAuto = true;
@@ -378,7 +459,7 @@ void sawp(bool allColor) {
   intakeThread.interrupt(); 
   intakeMotors.stop();
   intakeMotors.spin(fwd, 65, pct);
-  chassis.drive_to_point(-30, 48, 0, 8, 6, 4, 0, 2000);
+  chassis.drive_to_point(-30, 48, 0, 8, 11, 4, 0, 2000);
   intakeScoreTop(false); //Run motors early for faster scoring
   // chassis.drive_to_point(-24, 48, 0, 4, 4, 0, 150, 500); //Scoring in long goal
   distanceReset(0);
