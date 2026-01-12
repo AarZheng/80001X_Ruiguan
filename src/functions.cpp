@@ -20,68 +20,16 @@ int autoScore(void *isBlue) {
   return 0;
 }
 
-int agitatorAntiJam() {
-  while(true) {
-
-    antiJamUpdate(agitator);   // anti-jam logic runs here
-
-    wait(25, msec);
-  }
-}
-
-// SETTINGS
-float JAM_CURRENT = 1.5;       // Amps that indicate a jam (tune this per motor)
-float JAM_VELOCITY = 5;        // RPM threshold that counts as "not spinning"
-int JAM_DEBOUNCE = 150;        // ms motor must be jammed before reversing
-int UNJAM_TIME = 800;          // ms to reverse and clear the jam
-int UNJAM_SPEED = -100;         // reverse speed during unjam
-int NORMAL_SPEED = 100;        // forward speed during normal operation
-
-// STATE VARIABLES
-int jamStartTime = 0;
-bool isUnjamming = false;
-int unjamEndTime = 0;
-
-void antiJamUpdate(motor &m) {
-    int now = vex::timer::system();
-    
-    float vel = m.velocity(rpm);
-    float current = m.current(amp);
-
-    // 1. If we are unjamming
-    if (isUnjamming) {
-        if (now >= unjamEndTime) {
-            // Stop unjamming → return to normal control
-            isUnjamming = false;
-        }
-        return;
-    }
-
-    // 2. Check if motor is jammed
-    bool velocityLow = fabs(vel) < JAM_VELOCITY;
-    bool currentHigh = current > JAM_CURRENT;
-    bool commandedForward = m.isSpinning();  // motor was told to move
-
-    if (commandedForward && velocityLow && currentHigh) {
-        // Start counting jam duration
-        if (jamStartTime == 0)
-            jamStartTime = now;
-
-        // Jam sustained long enough → trigger unjam
-        if (now - jamStartTime > JAM_DEBOUNCE) {
-            isUnjamming = true;
-            unjamEndTime = now + UNJAM_TIME;
-
-            m.spin(fwd, UNJAM_SPEED, pct); // reverse the motor
-            printf("Motor jam detected → reversing\n");
-        }
-    } else {
-        // No jam
-        jamStartTime = 0;
-    }
-}
-
 void intakeStore(bool sort, bool isBlue) {
+
+  ramp.close();
+  flapsMotor.spin(fwd, 100, pct);
+
+  if(!sort) {
+    intakeCommand = false;
+    hoodMotor.stop(hold);
+    return;
+  }
 
   // Detect wrong color
   bool wrongColor =
@@ -91,95 +39,53 @@ void intakeStore(bool sort, bool isBlue) {
 
   // If wrong color is detected again, extend the ejection duration
   if (wrongColor) {
-    ejectEndTime = Brain.Timer.time(msec) + 200;  // extend by 250ms
+    ejectEndTime = Brain.timer(msec) + 200;  // extend by 250ms
     intakeCommand = true;
-    // printf("Sorted: %f\n", colorSorter.hue());
+    
   }
 
   // If currently in ejection period, keep ejecting
-  if (Brain.Timer.time(msec) < ejectEndTime) {
-    hood.open();
-    intakeFront.spin(fwd, 100, pct);
-    intakeBack.spin(fwd, 100, pct);
-    intakeTop.spin(fwd, 100, pct);
+  if (Brain.timer(msec) < ejectEndTime) {
+    hoodMotor.spin(fwd, 100, pct);
   }
   else {
     // Normal intake mode
     intakeCommand = false;
-    hood.close();
-    intakeFront.spin(fwd, 100, pct);
-    intakeBack.spin(fwd, 100, pct);
-    intakeTop.spin(fwd, 100, pct);
+    hoodMotor.stop(hold);
   }
 }
-
-// void intakeStore(bool sort, bool isBlue) {
-//   if(sort && 
-//   ((isBlue == true && colorSorter.hue() > 0 && colorSorter.hue() < 16) || 
-//   (isBlue == false && colorSorter.hue() > 180 && colorSorter.hue() < 240))) { //Detects if the color sensor sees the wrong color of ball
-//     intakeCommand = true; //Flag to prevent other intake commands
-//     hood.open(); //Opens hood to eject wrong color ball
-//     intakeFront.spin(fwd, 100, pct);
-//     intakeBack.spin(fwd, 100, pct);
-//     intakeTop.spin(fwd, 100, pct);
-//     wait(250, msec); //Time to eject wrong color ball
-//     intakeCommand = false;
-//     printf("Sorted: %f", colorSorter.hue());
-//   }
-//   else {
-//     hood.close(); //Intake into basket
-//     intakeFront.spin(fwd, 100, pct);
-//     intakeBack.spin(fwd, 100, pct);
-//     intakeTop.spin(fwd, 100, pct);
-//   }
-// }
 
 void intakeStore(bool isBlue) {
   intakeStore(true, isBlue);
 }
 
 void outtake(bool slowed) {
-  if(slowed) {
-    intakeFront.spin(reverse, 40, pct);
-    intakeBack.spin(fwd, 40, pct);
-    intakeTop.spin(reverse, 40, pct);
-    agitator.spin(fwd, 15, pct);
-  }
-  else {
-    intakeFront.spin(reverse, 100, pct);
-    intakeBack.spin(fwd, 67, pct);
-    intakeTop.spin(reverse, 100, pct);
-    agitator.spin(fwd, 70, pct);
-  }
+  intakeMotors.spin(reverse, 100, pct);
 }
 
 void intakeScoreTop(bool sort, bool isBlue) {
-  // if(sort && 
-  // // ((isBlue == true && colorSorter.hue() > 0 && colorSorter.hue() < 30) || 
-  // // (isBlue == false && colorSorter.hue() > 180 && colorSorter.hue() < 240))) {
-  // //   intakeCommand = true;
-  // //   hood.close();
-  // //   // intakeMotors.spin(fwd, 50, pct);
-  // //   intakeBack.spin(fwd, 100, pct);
-  // //   intakeTop.spin(fwd, 100, pct);
-  // //   agitator.spin(fwd, 25, pct);
-  // //   intakeFront.stop();
-  // //   wait(350, msec);
-  // //   intakeCommand = false;
-  // // }
-  // // else if ((isBlue == false && colorSorter.hue() > 0 && colorSorter.hue() < 30) || 
-  // //   (isBlue == true && colorSorter.hue() > 180 && colorSorter.hue() < 240)) {
-  // //   hood.open();
-  // //   intakeMotors.spin(fwd, 100, pct);
-  // // }
-  // // else if(!sort) {
-  // //   hood.open();
-  // //   intakeMotors.spin(fwd, 100, pct);
-  // // }
-  // // else {
-    hood.open();
+  ramp.close();
+  intakeMotors.spin(fwd, 100, pct);
+
+  /*
+  if(sort) {
+    bool wrongColor =
+    (sort &&
+    ((isBlue && colorSorter.hue() > 0 && colorSorter.hue() < 16) ||
+     (!isBlue && colorSorter.hue() > 180 && colorSorter.hue() < 240)));
+     if(wrongColor) {
+       intakeMotors.stop();
+     }
+     else {
+       ramp.close();
+      intakeMotors.spin(fwd, 100, pct);
+     }
+  }
+  else {
+    ramp.close();
     intakeMotors.spin(fwd, 100, pct);
-  // }
+  }
+  */
 }
 
 void intakeScoreTop(bool isBlue) {
@@ -187,48 +93,11 @@ void intakeScoreTop(bool isBlue) {
 }
 
 void intakeScoreMid(double speed) {
-  intakeFront.spin(fwd, speed * 0.4, pct);
-  intakeBack.spin(fwd, speed, pct);
-  intakeTop.spin(reverse, speed * 0.75, pct);
-  agitator.spin(fwd, speed, pct);
+  ramp.open();
+  flapsMotor.spin(fwd, speed, pct);
+  // hoodMotor.stop(hold);
+  hoodMotor.spin(reverse, 10, pct);
 }
-
-// float sensorFilter(distance sensor, float odomValue, bool negative) { //Simple low-pass filter to remove inconsistent values
-
-//   float sensorValue;
-
-//   if(sensor.objectDistance(inches) == frontDist.objectDistance(inches)) {
-//     sensorValue = frontDist.objectDistance(inches) + 6;
-//     printf("Sensor selection: front");
-//   }
-//   else if(sensor.objectDistance(inches) == backDist.objectDistance(inches)) {
-//     sensorValue = backDist.objectDistance(inches) + 7;
-//     printf("Sensor selection: back");
-//   }
-//   else if(sensor.objectDistance(inches) == leftDist.objectDistance(inches)){
-//     sensorValue = leftDist.objectDistance(inches) + 6.5;
-//     printf("Sensor selection: left");
-//   }
-//   else {
-//     sensorValue = rightDist.objectDistance(inches) + 6.5;
-//     printf("Sensor selection: right");
-//   }
-
-//   printf("Sensor value: %f\n", sensorValue);
-
-//   if(!negative && fabs((72 - sensorValue - odomValue) / odomValue) < 0.4) { //Distance sensor reading is somewhat similar to odom estimation
-//     return 72 - sensorValue;
-//   }
-//   else if(negative && fabs((-72 + sensorValue - odomValue) / odomValue) < 0.4) {
-//     return -72 + sensorValue;
-//   }
-  
-//   else {
-//     printf("ERROR: Distance failed \n");
-//     printf("Sensor installed: %s\n", sensor.installed() ? "true" : "false");
-//     return odomValue;
-//   }
-// }
 
 float correctedDistance(float rawDist, float robotHeading, float expectedHeading) {
     float angleError = (robotHeading - expectedHeading) * M_PI / 180.0; // radians
@@ -241,19 +110,19 @@ float sensorFilter(distance sensor, float odomValue, bool negative) {
 
   // Select which sensor is being used & apply offset
   if(sensor.objectDistance(inches) == frontDist.objectDistance(inches)) {
-    sensorValue = frontDist.objectDistance(inches) + 6;
+    sensorValue = frontDist.objectDistance(inches) + 2;
     printf("Sensor selection: front\n");
   }
   else if(sensor.objectDistance(inches) == backDist.objectDistance(inches)) {
-    sensorValue = backDist.objectDistance(inches) + 7;
-    printf("Sensor selection: back\n");
+    sensorValue = backDist.objectDistance(inches) + 4;
+    printf("Sensor selection: back\n"); 
   }
   else if(sensor.objectDistance(inches) == leftDist.objectDistance(inches)){
-    sensorValue = leftDist.objectDistance(inches) + 6.5;
+    sensorValue = leftDist.objectDistance(inches) + 6;
     printf("Sensor selection: left\n");
   }
   else {
-    sensorValue = rightDist.objectDistance(inches) + 6.5;
+    sensorValue = rightDist.objectDistance(inches) + 6;
     printf("Sensor selection: right\n");
   }
 

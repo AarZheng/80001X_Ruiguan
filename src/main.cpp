@@ -67,10 +67,10 @@ motor_group(leftBack, leftMid, leftFront),
 motor_group(rightBack, rightMid, rightFront),
 
 //Specify the PORT NUMBER of your inertial sensor, in PORT format (i.e. "PORT1", not simply "1"):
-PORT21,
+PORT4,
 
 //Input your wheel diameter. (4" omnis are actually closer to 4.125"):
-2.88936,
+3.35,
 
 //External ratio, must be in decimal, in the format of input teeth/output teeth.
 //If your motor has an 84-tooth gear and your wheel has a 60-tooth gear, this value will be 1.4.
@@ -210,70 +210,58 @@ void autonomous(void) {
   switch(current_auton_selection){ 
     case 0:
       allColor = true;
-      leftCenterLong(allColor);
+      skills();
+      // leftCenterLong(allColor);
       break;
     case 1:
       allColor = false;
-      leftCenterLong(allColor);
+      // leftCenterLong(allColor);
       break;
     case 2:
       allColor = true;         
-      rightCenterLong(allColor);
+      // rightCenterLong(allColor);
       break;
     case 3:
       allColor = false;
-      rightCenterLong(allColor);
+      // rightCenterLong(allColor);
       break;
     case 4:
       allColor = true;
-      sawpLeft(allColor);
+      // sawpLeft(allColor);
       break;
     case 5:
       allColor = false;
-      sawpLeft(allColor);
+      // sawpLeft(allColor);
       break;
     case 6:
       allColor = true;
-      sawpRight(allColor);
+      // sawpRight(allColor);
       break;
     case 7:
       allColor = false;
-      sawpRight(allColor);
+      // sawpRight(allColor);
       break;
     case 8:
       allColor = true;
-      rightLong(allColor);
+      // rightLong(allColor);
       break;
     case 9:
       allColor = false;
-      rightLong(allColor);
+      // rightLong(allColor);
       break;
     case 10:
       allColor = true;
-      leftLong(allColor);
+      // leftLong(allColor);
       break;
     case 11:
       allColor = false;
-      leftLong(allColor);
+      // leftLong(allColor);
       break;
     case 12:
       allColor = true;
-      skills();
+      // skills();
       break;
  }
-}
-int agitatorJam() {
-  while(true) {
-    if(agitator.torque() > 0.3 && fabs(agitator.velocity(rpm)) < 10) {
-      printf("%f \n", agitator.efficiency());
-      intakeCommand = true;
-      agitator.spin(reverse, 100, pct);
-      wait(200, msec);
-      intakeCommand = false;
-    }
-    wait(5, msec);
-  }
-  return 0;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -285,13 +273,13 @@ int agitatorJam() {
 /*                                                                           */
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
-bool useSensors = true;
-
+bool useSensors = false;
+double midScorePressed = 0;
+bool chassisControl = false;
 
 void usercontrol(void) {
   // thread agitatorThread = thread(agitatorJam);
   antler.open();
-  descore.open();
   Controller.Screen.clearScreen();
   
 
@@ -301,16 +289,6 @@ void usercontrol(void) {
   isAuto = false;
   Brain.resetTimer();
   ejectEndTime = 0;
-
-  Controller.ButtonRight.pressed([] {
-    if(!descoreActive) {
-      descore.close();
-    }
-    else {
-      descore.open();
-    }
-    descoreActive = !descoreActive;
-  });
 
   Controller.ButtonB.pressed([] {
     Controller.Screen.setCursor(1, 1);
@@ -332,15 +310,13 @@ void usercontrol(void) {
     ejectEndTime = 0;
   });
 
-  Controller.ButtonLeft.pressed([] {
-    chassis.drive_distance(-3.5, chassis.get_absolute_heading(), 6, 0, 1, 100, 2000);
-    chassis.drive_stop(hold);
-    chassis.drive_stop(coast);
-
-    useSensors = false;
-    Controller.Screen.setCursor(4, 1);
-    Controller.Screen.clearLine(4);
-    Controller.Screen.print("SORTING: %s", useSensors ? "YES" : "NO ");
+  Controller.ButtonRight.pressed([] {
+    double approximate_zero = chassis.get_absolute_heading();
+    chassisControl = true;
+    chassis.turn_to_angle(approximate_zero + 60, 12, 8, 0, 2000);
+    chassis.drive_distance(9, 0, 12, 0);
+    chassis.turn_to_angle(approximate_zero + 20);
+    chassisControl = false;
   });
 
   Controller.ButtonX.pressed([] {
@@ -349,6 +325,11 @@ void usercontrol(void) {
     Controller.Screen.clearLine(4);
     Controller.Screen.print("SORTING: %s", useSensors ? "YES" : "NO ");
   });
+
+  Controller.ButtonL2.pressed([] {
+    midScorePressed = Brain.timer(msec);
+  });
+
 
   Controller.Screen.setCursor(1, 1);
   Controller.Screen.clearLine();
@@ -379,60 +360,56 @@ void usercontrol(void) {
           antler.close();
         }
         else {
+          hoodMotor.stop();
           intakeStore(useSensors, allColor);
         }
       }
       else if(Controller.ButtonR2.pressing() ) {
         chassis.DriveR.setStopping(hold);
         chassis.DriveL.setStopping(hold);
-        if(Controller.ButtonX.pressing()) {
-          outtake(true);
-        }
-        else {
-          outtake(false);
-        }
+        intakeMotors.spin(reverse, 100, pct);
       }
       else if(Controller.ButtonL1.pressing()) {
         //Score in top
         chassis.DriveR.setStopping(hold);
         chassis.DriveL.setStopping(hold);
-        intakeScoreTop(useSensors, allColor);
+        intakeScoreTop(false);
       }
       else if(Controller.ButtonL2.pressing()) {
         //Score in middle
         chassis.DriveR.setStopping(hold);
         chassis.DriveL.setStopping(hold);
-        descore.close();
-        descoreActive = true;
-        if(Controller.ButtonX.pressing()) {
-          intakeScoreMid(40);
+
+        if(Brain.timer(msec) - midScorePressed < 150) {
+          intakeMotors.spin(reverse, 80, pct);
+        }
+        else if(Controller.ButtonLeft.pressing()){
+          intakeScoreMid(60);
         }
         else {
-          intakeScoreMid(50);
+          intakeScoreMid(100);
         }
+        
       }
       else {
         intakeMotors.stop();
         chassis.DriveR.setStopping(coast);
         chassis.DriveL.setStopping(coast);
+        ramp.close();
         antler.open();
       }
 
     }
 
     if(Controller.ButtonY.pressing()) {
-      matchload.open();
+      matchload.open(); 
     }
     else {
       matchload.close();
     }
 
-    if(Controller.ButtonA.pressing()) {
-      agitator.spin(reverse, 100, pct);
-    }
-
-
     chassis.control_arcade();
+    
 
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
@@ -445,7 +422,6 @@ void usercontrol(void) {
 //
 int main() {
   // Set up callbacks for autonomous and driver control periods.
-  thread agitatorThread = thread(agitatorJam);
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 
