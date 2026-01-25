@@ -21,6 +21,7 @@ int autoScore(void *isBlue) {
 }
 
 void intakeStore(bool sort, bool isBlue) {
+  wrongTopBall = false;
 
   ramp.close();
   flapsMotor.spin(fwd, 100, pct);
@@ -34,23 +35,15 @@ void intakeStore(bool sort, bool isBlue) {
   // Detect wrong color
   bool wrongColor =
     (sort &&
-    ((isBlue && colorSorter.hue() > 0 && colorSorter.hue() < 16) ||
-     (!isBlue && colorSorter.hue() > 180 && colorSorter.hue() < 240)));
+    ((isBlue && colorSorter.hue() > 0 && colorSorter.hue() < 50) ||
+     (!isBlue && colorSorter.hue() > 100 && colorSorter.hue() < 240)));
 
-  // If wrong color is detected again, extend the ejection duration
-  if (wrongColor) {
-    ejectEndTime = Brain.timer(msec) + 200;  // extend by 250ms
+  if(wrongColor) {
     intakeCommand = true;
-    
-  }
-
-  // If currently in ejection period, keep ejecting
-  if (Brain.timer(msec) < ejectEndTime) {
-    hoodMotor.spin(fwd, 100, pct);
+    hoodMotor.spinFor(fwd, 180, deg, 600, rpm);
+    intakeCommand = false;
   }
   else {
-    // Normal intake mode
-    intakeCommand = false;
     hoodMotor.stop(hold);
   }
 }
@@ -67,25 +60,41 @@ void intakeScoreTop(bool sort, bool isBlue) {
   ramp.close();
   intakeMotors.spin(fwd, 100, pct);
 
-  /*
+  if(intakeCommand) {
+    return;
+  }
+  
   if(sort) {
     bool wrongColor =
     (sort &&
-    ((isBlue && colorSorter.hue() > 0 && colorSorter.hue() < 16) ||
-     (!isBlue && colorSorter.hue() > 180 && colorSorter.hue() < 240)));
-     if(wrongColor) {
-       intakeMotors.stop();
+    ((isBlue && colorSorter.hue() > 0 && colorSorter.hue() < 50) ||
+    (!isBlue && colorSorter.hue() > 100 && colorSorter.hue() < 240)));
+    
+
+
+     if(wrongColor || wrongTopBall) {
+        intakeMotors.stop();
+        intakeCommand = true;
+        if(!wrongTopBall) {
+          hoodMotor.spinFor(reverse, 360, deg, 600, rpm);
+        }
+        else {
+          wait(250, msec);
+        }
+        intakeCommand = false;
+
+        wrongTopBall = wrongColor;
      }
      else {
-       ramp.close();
-      intakeMotors.spin(fwd, 100, pct);
+        ramp.close();
+        intakeMotors.spin(fwd, 100, pct);
      }
   }
   else {
     ramp.close();
     intakeMotors.spin(fwd, 100, pct);
   }
-  */
+  
 }
 
 void intakeScoreTop(bool isBlue) {
@@ -95,8 +104,8 @@ void intakeScoreTop(bool isBlue) {
 void intakeScoreMid(double speed) {
   ramp.open();
   flapsMotor.spin(fwd, speed, pct);
-  // hoodMotor.stop(hold);
-  hoodMotor.spin(reverse, 10, pct);
+  hoodMotor.stop(hold);
+  // hoodMotor.spin(fwd, 5, pct);
 }
 
 float correctedDistance(float rawDist, float robotHeading, float expectedHeading) {

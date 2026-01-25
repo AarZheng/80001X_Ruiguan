@@ -25,10 +25,12 @@ motor_group intakeMotors = motor_group(flapsMotor, hoodMotor);
 pneumatics matchload = pneumatics(Brain.ThreeWirePort.D);
 pneumatics ramp = pneumatics(Brain.ThreeWirePort.A);
 pneumatics antler = pneumatics(Brain.ThreeWirePort.B);
+pneumatics midDescore = pneumatics(Brain.ThreeWirePort.C);
 
 bool matchloadActive = false;
 bool topScoring = true;
 bool antlerActive = false;
+bool midDescoreActive = false;
 
 optical colorSorter = optical(PORT14);
 distance rightDist = distance(PORT18); //6

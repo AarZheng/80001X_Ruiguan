@@ -8,6 +8,7 @@ void intakeScoreMid(double speed = 100);
 
 static bool intakeCommand = false;
 static bool isAuto = false;
+static bool wrongTopBall = false;
 
 int autoIntake(void* isBlue);
 int autoScore(void* isBlue);

@@ -79,7 +79,7 @@ PORT4,
 
 //Gyro scale, this is what your gyro reads when you spin the robot 360 degrees.
 //For most cases 360 will do fine here, but this scale factor can be very helpful when precision is necessary.
-358.9,
+355.9,
 
 /*---------------------------------------------------------------------------*/
 /*                                  PAUSE!                                   */
@@ -147,49 +147,61 @@ void pre_auton() {
     Brain.Screen.printAt(5, 120, "Selected Auton:");
     switch(current_auton_selection){
       case 0:
-        Brain.Screen.printAt(5, 140, "Blue left long mid");
+        Brain.Screen.printAt(5, 140, "Blue right mid");
         break;
       case 1:
-        Brain.Screen.printAt(5, 140, "Red left long mid");
+        Brain.Screen.printAt(5, 140, "Red right mid");
         break;
       case 2:
-        Brain.Screen.printAt(5, 140, "Blue right long mid");
+        Brain.Screen.printAt(5, 140, "Blue left mid ");
         break;
       case 3:
-        Brain.Screen.printAt(5, 140, "Red right long mid");
+        Brain.Screen.printAt(5, 140, "Red left mid");
         break;
       case 4:
-        Brain.Screen.printAt(5, 140, "Blue left SAWP");
-        break;
-      case 5:
-        Brain.Screen.printAt(5, 140, "Red left SAWP");
-        break;
-      case 6:
         Brain.Screen.printAt(5, 140, "Blue right SAWP");
         break;
-      case 7:
+      case 5:
         Brain.Screen.printAt(5, 140, "Red right SAWP");
         break;
+      case 6:
+        Brain.Screen.printAt(5, 140, "Blue right hold");
+        break;
+      case 7:
+        Brain.Screen.printAt(5, 140, "Red right hold");
+        break;
       case 8:
-        Brain.Screen.printAt(5, 140, "Blue right long");
+        Brain.Screen.printAt(5, 140, "Blue right wing");
         break;
       case 9:
-        Brain.Screen.printAt(5, 140, "Red right long");
+        Brain.Screen.printAt(5, 140, "Red right wing");
         break;
       case 10:
-        Brain.Screen.printAt(5, 140, "Blue left long");
+        Brain.Screen.printAt(5, 140, "Blue left hold");
         break;
       case 11:
-        Brain.Screen.printAt(5, 140, "Blue left long");
+        Brain.Screen.printAt(5, 140, "Blue left hold");
         break;
       case 12:
+        Brain.Screen.printAt(5, 140, "Blue left wing");
+        break;
+      case 13:
+        Brain.Screen.printAt(5, 140, "Blue left wing");
+        break; 
+      case 14:
         Brain.Screen.printAt(5, 140, "Skills");
         break;
     }
-    if(Brain.Screen.pressing()){
-      while(Brain.Screen.pressing()) {}
+    // if(Brain.Screen.pressing()){
+    //   while(Brain.Screen.pressing()) {}
+    //   current_auton_selection ++;
+    // } else if (current_auton_selection == 15) {
+    //   current_auton_selection = 0;
+    // }
+    if(Controller.ButtonA.pressing()){
+      while(Controller.ButtonA.pressing()) {}
       current_auton_selection ++;
-    } else if (current_auton_selection == 13) {
+    } else if (current_auton_selection == 15) {
       current_auton_selection = 0;
     }
     task::sleep(10);
@@ -209,57 +221,71 @@ void autonomous(void) {
   auto_started = true;
   switch(current_auton_selection){ 
     case 0:
-      allColor = true;
-      skills();
-      // leftCenterLong(allColor);
+      // allColor = true;
+      // //Right mid
+      // rightCenterLong(allColor);
+
+      allColor = false;
+      sawpRight(allColor);
       break;
     case 1:
       allColor = false;
-      // leftCenterLong(allColor);
+      rightCenterLong(allColor);
       break;
     case 2:
-      allColor = true;         
-      // rightCenterLong(allColor);
+      allColor = true;
+      //left mid
+      leftCenterLong(allColor);
       break;
     case 3:
       allColor = false;
-      // rightCenterLong(allColor);
+      leftCenterLong(allColor);
       break;
     case 4:
       allColor = true;
-      // sawpLeft(allColor);
+      //right sawp
+      sawpRight(allColor);
       break;
     case 5:
       allColor = false;
-      // sawpLeft(allColor);
+      sawpRight(allColor);
       break;
     case 6:
       allColor = true;
-      // sawpRight(allColor);
+      // right hold
       break;
     case 7:
       allColor = false;
-      // sawpRight(allColor);
+
       break;
     case 8:
       allColor = true;
-      // rightLong(allColor);
+      //right wing
       break;
     case 9:
       allColor = false;
-      // rightLong(allColor);
+
       break;
     case 10:
       allColor = true;
-      // leftLong(allColor);
+      //left hold
       break;
     case 11:
       allColor = false;
-      // leftLong(allColor);
+
       break;
     case 12:
       allColor = true;
-      // skills();
+      //left wing
+      break;
+    case 13:
+      allColor = false;
+
+      break;
+    
+    case 14:
+      allColor = true;
+      skills();
       break;
  }
 }
@@ -273,7 +299,7 @@ void autonomous(void) {
 /*                                                                           */
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
-bool useSensors = false;
+bool useSensors = true;
 double midScorePressed = 0;
 bool chassisControl = false;
 
@@ -311,12 +337,6 @@ void usercontrol(void) {
   });
 
   Controller.ButtonRight.pressed([] {
-    double approximate_zero = chassis.get_absolute_heading();
-    chassisControl = true;
-    chassis.turn_to_angle(approximate_zero + 60, 12, 8, 0, 2000);
-    chassis.drive_distance(9, 0, 12, 0);
-    chassis.turn_to_angle(approximate_zero + 20);
-    chassisControl = false;
   });
 
   Controller.ButtonX.pressed([] {
@@ -327,7 +347,10 @@ void usercontrol(void) {
   });
 
   Controller.ButtonL2.pressed([] {
-    midScorePressed = Brain.timer(msec);
+    // midScorePressed = Brain.timer(msec);
+    intakeCommand = true;
+    intakeMotors.spinFor(reverse, 180, deg, 540, rpm);
+    intakeCommand = false;
   });
 
 
@@ -355,6 +378,7 @@ void usercontrol(void) {
     if(!intakeCommand) {
 
       if(Controller.ButtonR1.pressing()) {
+        ramp.close();
         if(Controller.ButtonR2.pressing()) {
           intakeMotors.stop();
           antler.close();
@@ -365,29 +389,42 @@ void usercontrol(void) {
         }
       }
       else if(Controller.ButtonR2.pressing() ) {
+        ramp.close();
         chassis.DriveR.setStopping(hold);
         chassis.DriveL.setStopping(hold);
-        intakeMotors.spin(reverse, 100, pct);
+
+        if(Controller.ButtonLeft.pressing()) {
+          intakeMotors.spin(reverse, 70, pct);
+        }
+        else {
+          intakeMotors.spin(reverse, 100, pct);
+        }
+        
       }
       else if(Controller.ButtonL1.pressing()) {
         //Score in top
-        chassis.DriveR.setStopping(hold);
-        chassis.DriveL.setStopping(hold);
-        intakeScoreTop(false);
+        ramp.close();
+        if(Controller.ButtonL2.pressing()) {
+          midDescore.open();
+        }
+        else {
+          chassis.DriveR.setStopping(hold);
+          chassis.DriveL.setStopping(hold);
+          intakeScoreTop(useSensors, allColor);
+        }
       }
       else if(Controller.ButtonL2.pressing()) {
         //Score in middle
         chassis.DriveR.setStopping(hold);
         chassis.DriveL.setStopping(hold);
-
-        if(Brain.timer(msec) - midScorePressed < 150) {
-          intakeMotors.spin(reverse, 80, pct);
+        if(intakeCommand) {
+          return;
         }
         else if(Controller.ButtonLeft.pressing()){
-          intakeScoreMid(60);
+          intakeScoreMid(50); //.75
         }
         else {
-          intakeScoreMid(100);
+          intakeScoreMid(60);
         }
         
       }
@@ -395,8 +432,8 @@ void usercontrol(void) {
         intakeMotors.stop();
         chassis.DriveR.setStopping(coast);
         chassis.DriveL.setStopping(coast);
-        ramp.close();
         antler.open();
+        midDescore.close();
       }
 
     }
