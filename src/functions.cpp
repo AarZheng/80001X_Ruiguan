@@ -8,6 +8,7 @@ int autoIntake(void *isBlue) {
   while(isAuto) {
     intakeStore(true, *(bool *)isBlue);
     wait(5, msec);
+    
   }
   return 0;
 }

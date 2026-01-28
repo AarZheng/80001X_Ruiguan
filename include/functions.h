@@ -7,7 +7,7 @@ void intakeScoreTop(bool sort, bool blue = true);
 void intakeScoreMid(double speed = 100);
 
 static bool intakeCommand = false;
-static bool isAuto = false;
+static bool isAuto = true;
 static bool wrongTopBall = false;
 
 int autoIntake(void* isBlue);

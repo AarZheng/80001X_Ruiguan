@@ -70,7 +70,9 @@ motor_group(rightBack, rightMid, rightFront),
 PORT4,
 
 //Input your wheel diameter. (4" omnis are actually closer to 4.125"):
-3.35,
+
+// 3.35,
+3.297, //3.5
 
 //External ratio, must be in decimal, in the format of input teeth/output teeth.
 //If your motor has an 84-tooth gear and your wheel has a 60-tooth gear, this value will be 1.4.
@@ -180,13 +182,13 @@ void pre_auton() {
         Brain.Screen.printAt(5, 140, "Blue left hold");
         break;
       case 11:
-        Brain.Screen.printAt(5, 140, "Blue left hold");
+        Brain.Screen.printAt(5, 140, "Red left hold");
         break;
       case 12:
         Brain.Screen.printAt(5, 140, "Blue left wing");
         break;
       case 13:
-        Brain.Screen.printAt(5, 140, "Blue left wing");
+        Brain.Screen.printAt(5, 140, "Red left wing");
         break; 
       case 14:
         Brain.Screen.printAt(5, 140, "Skills");
@@ -198,8 +200,8 @@ void pre_auton() {
     // } else if (current_auton_selection == 15) {
     //   current_auton_selection = 0;
     // }
-    if(Controller.ButtonA.pressing()){
-      while(Controller.ButtonA.pressing()) {}
+    if(Controller.ButtonA.pressing() || Brain.Screen.pressing()){
+      while(Controller.ButtonA.pressing() || Brain.Screen.pressing()) {}
       current_auton_selection ++;
     } else if (current_auton_selection == 15) {
       current_auton_selection = 0;
@@ -221,12 +223,11 @@ void autonomous(void) {
   auto_started = true;
   switch(current_auton_selection){ 
     case 0:
-      // allColor = true;
-      // //Right mid
-      // rightCenterLong(allColor);
-
       allColor = false;
-      sawpRight(allColor);
+      // //Right mid
+      leftCenterLong(allColor);
+
+      // skills();
       break;
     case 1:
       allColor = false;
@@ -244,43 +245,47 @@ void autonomous(void) {
     case 4:
       allColor = true;
       //right sawp
-      sawpRight(allColor);
+      rightSawp(allColor);
       break;
     case 5:
       allColor = false;
-      sawpRight(allColor);
+      rightSawp(allColor);
       break;
     case 6:
       allColor = true;
       // right hold
+      rightHood(allColor);
       break;
     case 7:
       allColor = false;
-
+      rightHood(allColor);
       break;
     case 8:
       allColor = true;
       //right wing
+      rightWing(allColor);
       break;
     case 9:
       allColor = false;
-
+      rightWing(allColor);
       break;
     case 10:
       allColor = true;
       //left hold
+      leftHood(allColor);
       break;
     case 11:
       allColor = false;
-
+      leftHood(allColor);
       break;
     case 12:
       allColor = true;
       //left wing
+      leftWing(allColor);
       break;
     case 13:
       allColor = false;
-
+      leftWing(allColor);
       break;
     
     case 14:
@@ -299,13 +304,15 @@ void autonomous(void) {
 /*                                                                           */
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
-bool useSensors = true;
+bool useSensors = false;
 double midScorePressed = 0;
 bool chassisControl = false;
 
 void usercontrol(void) {
   // thread agitatorThread = thread(agitatorJam);
   antler.open();
+  midDescore.close();
+  matchload.close();
   Controller.Screen.clearScreen();
   
 
@@ -336,8 +343,15 @@ void usercontrol(void) {
     ejectEndTime = 0;
   });
 
-  Controller.ButtonRight.pressed([] {
-  });
+  // Controller.ButtonRight.pressed([] {
+  //   if(!midDescoreActive) {
+  //     midDescore.open();
+  //   }
+  //   else {
+  //     midDescore.close();
+  //   }
+  //   midDescoreActive = !midDescoreActive;
+  // });
 
   Controller.ButtonX.pressed([] {
     useSensors = false;
@@ -349,7 +363,7 @@ void usercontrol(void) {
   Controller.ButtonL2.pressed([] {
     // midScorePressed = Brain.timer(msec);
     intakeCommand = true;
-    intakeMotors.spinFor(reverse, 180, deg, 540, rpm);
+    intakeMotors.spinFor(reverse, 135, deg, 500, rpm);
     intakeCommand = false;
   });
 
@@ -394,7 +408,7 @@ void usercontrol(void) {
         chassis.DriveL.setStopping(hold);
 
         if(Controller.ButtonLeft.pressing()) {
-          intakeMotors.spin(reverse, 70, pct);
+          intakeMotors.spin(reverse, 40, pct);
         }
         else {
           intakeMotors.spin(reverse, 100, pct);
@@ -404,14 +418,10 @@ void usercontrol(void) {
       else if(Controller.ButtonL1.pressing()) {
         //Score in top
         ramp.close();
-        if(Controller.ButtonL2.pressing()) {
-          midDescore.open();
-        }
-        else {
-          chassis.DriveR.setStopping(hold);
-          chassis.DriveL.setStopping(hold);
-          intakeScoreTop(useSensors, allColor);
-        }
+      
+        chassis.DriveR.setStopping(hold);
+        chassis.DriveL.setStopping(hold);
+        intakeScoreTop(useSensors, allColor);
       }
       else if(Controller.ButtonL2.pressing()) {
         //Score in middle
@@ -424,7 +434,7 @@ void usercontrol(void) {
           intakeScoreMid(50); //.75
         }
         else {
-          intakeScoreMid(60);
+          intakeScoreMid(65);
         }
         
       }
@@ -433,16 +443,25 @@ void usercontrol(void) {
         chassis.DriveR.setStopping(coast);
         chassis.DriveL.setStopping(coast);
         antler.open();
-        midDescore.close();
+        // midDescore.close();
       }
 
     }
 
     if(Controller.ButtonY.pressing()) {
       matchload.open(); 
+      midDescore.close();
     }
     else {
       matchload.close();
+    }
+
+    if(Controller.ButtonRight.pressing()) {
+      midDescore.open();
+      matchload.close();
+    }
+    else {
+      midDescore.close();
     }
 
     chassis.control_arcade();
