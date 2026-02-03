@@ -167,28 +167,28 @@ void pre_auton() {
         Brain.Screen.printAt(5, 140, "Red right SAWP");
         break;
       case 6:
-        Brain.Screen.printAt(5, 140, "Blue right hold");
+        Brain.Screen.printAt(5, 140, "Blue right 4 wing");
         break;
       case 7:
-        Brain.Screen.printAt(5, 140, "Red right hold");
+        Brain.Screen.printAt(5, 140, "Red right 4 wing");
         break;
       case 8:
-        Brain.Screen.printAt(5, 140, "Blue right wing");
+        Brain.Screen.printAt(5, 140, "Blue right 7 wing");
         break;
       case 9:
-        Brain.Screen.printAt(5, 140, "Red right wing");
+        Brain.Screen.printAt(5, 140, "Red right 7 wing");
         break;
       case 10:
-        Brain.Screen.printAt(5, 140, "Blue left hold");
+        Brain.Screen.printAt(5, 140, "Blue left 4 wing");
         break;
       case 11:
-        Brain.Screen.printAt(5, 140, "Red left hold");
+        Brain.Screen.printAt(5, 140, "Red left 4 wing");
         break;
       case 12:
-        Brain.Screen.printAt(5, 140, "Blue left wing");
+        Brain.Screen.printAt(5, 140, "Blue left 7 wing");
         break;
       case 13:
-        Brain.Screen.printAt(5, 140, "Red left wing");
+        Brain.Screen.printAt(5, 140, "Red left 7 wing");
         break; 
       case 14:
         Brain.Screen.printAt(5, 140, "Skills");
@@ -223,11 +223,10 @@ void autonomous(void) {
   auto_started = true;
   switch(current_auton_selection){ 
     case 0:
-      allColor = false;
-      // //Right mid
-      leftCenterLong(allColor);
-
-      // skills();
+      allColor = true;
+      // // //Right mid
+      rightCenterLong(allColor);
+      
       break;
     case 1:
       allColor = false;
@@ -254,38 +253,38 @@ void autonomous(void) {
     case 6:
       allColor = true;
       // right hold
-      rightHood(allColor);
+      right4Wing(allColor);
       break;
     case 7:
       allColor = false;
-      rightHood(allColor);
+      right4Wing(allColor);
       break;
     case 8:
       allColor = true;
       //right wing
-      rightWing(allColor);
+      right7Wing(allColor);
       break;
     case 9:
       allColor = false;
-      rightWing(allColor);
+      right7Wing(allColor);
       break;
     case 10:
       allColor = true;
       //left hold
-      leftHood(allColor);
+      left4Wing(allColor);
       break;
     case 11:
       allColor = false;
-      leftHood(allColor);
+      left4Wing(allColor);
       break;
     case 12:
       allColor = true;
       //left wing
-      leftWing(allColor);
+      left7Wing(allColor);
       break;
     case 13:
       allColor = false;
-      leftWing(allColor);
+      left7Wing(allColor);
       break;
     
     case 14:
@@ -310,6 +309,7 @@ bool chassisControl = false;
 
 void usercontrol(void) {
   // thread agitatorThread = thread(agitatorJam);
+  chassis.drive_max_voltage = 12;
   antler.open();
   midDescore.close();
   matchload.close();
@@ -363,7 +363,7 @@ void usercontrol(void) {
   Controller.ButtonL2.pressed([] {
     // midScorePressed = Brain.timer(msec);
     intakeCommand = true;
-    intakeMotors.spinFor(reverse, 135, deg, 500, rpm);
+    intakeMotors.spinFor(reverse, 160, deg, 500, rpm);
     intakeCommand = false;
   });
 
@@ -434,7 +434,7 @@ void usercontrol(void) {
           intakeScoreMid(50); //.75
         }
         else {
-          intakeScoreMid(65);
+          intakeScoreMid(70);
         }
         
       }

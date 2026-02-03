@@ -16,10 +16,10 @@ void odom_test();
 void tank_odom_test();
 void holonomic_odom_test();
 
-void leftHood(bool allColor);
-void rightHood(bool allColor);
-void leftWing(bool allColor);
-void rightWing(bool allColor);
+void left4Wing(bool allColor);
+void right4Wing(bool allColor);
+void left7Wing(bool allColor);
+void right7Wing(bool allColor);
 void leftCenterLong(bool allColor);
 void rightCenterLong(bool allColor);
 void leftCenter(bool allColor);
