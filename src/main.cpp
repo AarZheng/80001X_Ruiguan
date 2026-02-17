@@ -223,9 +223,10 @@ void autonomous(void) {
   auto_started = true;
   switch(current_auton_selection){ 
     case 0:
-      allColor = true;
+      allColor = false;
       // // //Right mid
-      rightCenterLong(allColor);
+      // rightCenterLong(allColor);
+      temp(allColor);
       
       break;
     case 1:
@@ -306,15 +307,50 @@ void autonomous(void) {
 bool useSensors = false;
 double midScorePressed = 0;
 bool chassisControl = false;
+bool skillsRun = true;
+
+std::atomic<bool> skills_macro(false);
+thread skillsTask;
+
+int auto_skills_in_driver() {
+  skills();
+  return 0;
+}
 
 void usercontrol(void) {
-  // thread agitatorThread = thread(agitatorJam);
   chassis.drive_max_voltage = 12;
   antler.open();
   midDescore.close();
   matchload.close();
   Controller.Screen.clearScreen();
   
+  // Controller.ButtonUp.pressed([] {
+  //   if(skillsRun) {
+  //     if(skills_macro.load()) {
+  //       skillsTask.stop();
+  //     }
+  //     else if(!skills_macro.load()) {
+  //       skillsTask = task(auto_skills_in_driver);
+  //     }
+  //     skills_macro = !skills_macro;
+  //   }
+  // });
+
+  Controller.ButtonUp.pressed([] {
+    if(skillsRun) {
+      intakeCommand = true;
+      chassisControl = true;
+      skillsTask = thread(auto_skills_in_driver);
+    }
+  });
+
+  Controller.ButtonR1.pressed([] {
+    printf("Emergency stop \n");
+    skillsTask.interrupt();
+    intakeCommand = false;
+    chassisControl = false;
+    skillsRun = false;
+  });
 
   chassis.DriveR.setStopping(coast);
   chassis.DriveL.setStopping(coast);
@@ -343,16 +379,6 @@ void usercontrol(void) {
     ejectEndTime = 0;
   });
 
-  // Controller.ButtonRight.pressed([] {
-  //   if(!midDescoreActive) {
-  //     midDescore.open();
-  //   }
-  //   else {
-  //     midDescore.close();
-  //   }
-  //   midDescoreActive = !midDescoreActive;
-  // });
-
   Controller.ButtonX.pressed([] {
     useSensors = false;
     Controller.Screen.setCursor(4, 1);
@@ -362,9 +388,9 @@ void usercontrol(void) {
 
   Controller.ButtonL2.pressed([] {
     // midScorePressed = Brain.timer(msec);
-    intakeCommand = true;
-    intakeMotors.spinFor(reverse, 160, deg, 500, rpm);
-    intakeCommand = false;
+    // intakeCommand = true;
+    // outtakeForMid();
+    // intakeCommand = false;
   });
 
 
@@ -389,6 +415,7 @@ void usercontrol(void) {
 
     //Replace this line with chassis.control_tank(); for tank drive 
     //or chassis.control_holonomic(); for holo drive.
+
     if(!intakeCommand) {
 
       if(Controller.ButtonR1.pressing()) {
@@ -434,7 +461,7 @@ void usercontrol(void) {
           intakeScoreMid(50); //.75
         }
         else {
-          intakeScoreMid(70);
+          intakeScoreMid(53);
         }
         
       }
@@ -446,25 +473,27 @@ void usercontrol(void) {
         // midDescore.close();
       }
 
+      if(Controller.ButtonY.pressing()) {
+        matchload.open(); 
+        midDescore.close();
+      }
+      else {
+        matchload.close();
+      }
+
+      if(Controller.ButtonRight.pressing()) {
+        midDescore.open();
+        matchload.close();
+      }
+      else {
+        midDescore.close();
+      }
     }
 
-    if(Controller.ButtonY.pressing()) {
-      matchload.open(); 
-      midDescore.close();
+    if(!chassisControl) {
+      chassis.control_arcade();
     }
-    else {
-      matchload.close();
-    }
-
-    if(Controller.ButtonRight.pressing()) {
-      midDescore.open();
-      matchload.close();
-    }
-    else {
-      midDescore.close();
-    }
-
-    chassis.control_arcade();
+    
     
 
     wait(20, msec); // Sleep the task for a short amount of time to

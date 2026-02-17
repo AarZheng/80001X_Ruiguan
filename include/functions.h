@@ -16,5 +16,6 @@ int agitatorAntiJam();
 
 void distanceReset(int quadrant);
 void antiJamUpdate(motor &m);
+void outtakeForMid();
 
 static uint32_t ejectEndTime = 0;

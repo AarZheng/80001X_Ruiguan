@@ -4,6 +4,10 @@
 
 std::atomic<bool> sorting(false);
 
+void outtakeForMid() {
+  intakeMotors.spinFor(reverse, 180, deg, 500, rpm, true);
+}
+
 int autoIntake(void *isBlue) {
   while(isAuto) {
     intakeStore(true, *(bool *)isBlue);
@@ -105,8 +109,9 @@ void intakeScoreTop(bool isBlue) {
 void intakeScoreMid(double speed) {
   ramp.open();
   flapsMotor.spin(fwd, speed, pct);
-  hoodMotor.stop(hold);
-  // hoodMotor.spin(fwd, 5, pct);
+  // hoodMotor.stop(hold);
+  hoodMotor.spin(reverse, 100, pct);
+  // hoodMotor.spin(reverse, 60, pct);
 }
 
 float correctedDistance(float rawDist, float robotHeading, float expectedHeading) {
