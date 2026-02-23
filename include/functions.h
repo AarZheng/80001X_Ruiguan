@@ -14,7 +14,7 @@ int autoIntake(void* isBlue);
 int autoScore(void* isBlue);
 int agitatorAntiJam();
 
-void distanceReset(int quadrant);
+void distanceReset(int quadrant, bool force = false);
 void antiJamUpdate(motor &m);
 void outtakeForMid();
 

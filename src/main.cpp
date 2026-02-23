@@ -72,7 +72,7 @@ PORT4,
 //Input your wheel diameter. (4" omnis are actually closer to 4.125"):
 
 // 3.35,
-3.297, //3.5
+3.3, //3.5
 
 //External ratio, must be in decimal, in the format of input teeth/output teeth.
 //If your motor has an 84-tooth gear and your wheel has a 60-tooth gear, this value will be 1.4.
@@ -117,7 +117,7 @@ PORT17,
 PORT19,
 
 //Sideways tracker diameter (reverse to make the direction switch):
-2.027,
+2.02,
 
 //Sideways tracker center distance (positive distance is behind the center of the robot, negative is in front):
 1.5
@@ -226,7 +226,7 @@ void autonomous(void) {
       allColor = false;
       // // //Right mid
       // rightCenterLong(allColor);
-      temp(allColor);
+      leftCenterLong(allColor);      // right7Wing(allColor);
       
       break;
     case 1:
@@ -435,7 +435,7 @@ void usercontrol(void) {
         chassis.DriveL.setStopping(hold);
 
         if(Controller.ButtonLeft.pressing()) {
-          intakeMotors.spin(reverse, 40, pct);
+          intakeMotors.spin(reverse, 30, pct);
         }
         else {
           intakeMotors.spin(reverse, 100, pct);
@@ -448,7 +448,12 @@ void usercontrol(void) {
       
         chassis.DriveR.setStopping(hold);
         chassis.DriveL.setStopping(hold);
-        intakeScoreTop(useSensors, allColor);
+        if(Controller.ButtonLeft.pressing()) {
+          flapsMotor.spin(fwd, 70, pct);
+          hoodMotor.spin(fwd, 50, pct);        }
+        else {
+          intakeScoreTop(useSensors, allColor);
+        }
       }
       else if(Controller.ButtonL2.pressing()) {
         //Score in middle
@@ -458,10 +463,11 @@ void usercontrol(void) {
           return;
         }
         else if(Controller.ButtonLeft.pressing()){
-          intakeScoreMid(50); //.75
+          flapsMotor.spin(fwd, 60, pct);
+          hoodMotor.spin(reverse, 60, pct);
         }
         else {
-          intakeScoreMid(53);
+          intakeScoreMid(60);
         }
         
       }

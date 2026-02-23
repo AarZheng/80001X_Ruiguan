@@ -119,25 +119,25 @@ float correctedDistance(float rawDist, float robotHeading, float expectedHeading
     return rawDist * cos(angleError);
 }
 
-float sensorFilter(distance sensor, float odomValue, bool negative) {
+float sensorFilter(distance sensor, float odomValue, bool negative, bool force) {
 
   float sensorValue;
 
   // Select which sensor is being used & apply offset
   if(sensor.objectDistance(inches) == frontDist.objectDistance(inches)) {
-    sensorValue = frontDist.objectDistance(inches) + 2;
+    sensorValue = frontDist.objectDistance(inches) + 4.5; //+2
     printf("Sensor selection: front\n");
   }
   else if(sensor.objectDistance(inches) == backDist.objectDistance(inches)) {
-    sensorValue = backDist.objectDistance(inches) + 4;
+    sensorValue = backDist.objectDistance(inches) + 4.5; //4
     printf("Sensor selection: back\n"); 
   }
   else if(sensor.objectDistance(inches) == leftDist.objectDistance(inches)){
-    sensorValue = leftDist.objectDistance(inches) + 6;
+    sensorValue = leftDist.objectDistance(inches) + 6.5; //6
     printf("Sensor selection: left\n");
   }
   else {
-    sensorValue = rightDist.objectDistance(inches) + 6;
+    sensorValue = rightDist.objectDistance(inches) + 6.5;
     printf("Sensor selection: right\n");
   }
 
@@ -151,10 +151,10 @@ float sensorFilter(distance sensor, float odomValue, bool negative) {
   printf("Raw sensor: %f | Corrected: %f\n", sensorValue, corrected);
 
   // Original consistency check, but using corrected distance
-  if(!negative && fabs((72 - corrected - odomValue) / odomValue) < 0.4) {
+  if(!negative && (force || fabs((72 - corrected - odomValue) / odomValue) < 0.4)) {
     return 72 - corrected;
   }
-  else if(negative && fabs((-72 + corrected - odomValue) / odomValue) < 0.4) {
+  else if(negative && (force || fabs((-72 + corrected - odomValue) / odomValue) < 0.4)) {
     return -72 + corrected;
   }
   else {
@@ -165,7 +165,7 @@ float sensorFilter(distance sensor, float odomValue, bool negative) {
 }
 
 
-void distanceReset(int quadrant) {
+void distanceReset(int quadrant, bool force) {
   if(quadrant == 0) { //auto-select quadrant
     if(chassis.get_X_position() > 0) {
       if(chassis.get_Y_position() > 0) {
@@ -188,7 +188,7 @@ void distanceReset(int quadrant) {
   }
 
   int resetAngle = std::round(chassis.get_absolute_heading() / 90.0);
-  if(resetAngle == 360) resetAngle = 0;
+  if(resetAngle == 4) resetAngle = 0;
   printf("Heading detected as: %i\n", resetAngle * 90);
   printf("Actual heading: %f\n", chassis.get_absolute_heading());
 
@@ -197,74 +197,74 @@ void distanceReset(int quadrant) {
   switch (quadrant) {
     case 1:
       if(resetAngle == 0) { //0 deg
-        chassis.odom.X_position = sensorFilter(rightDist, chassis.get_X_position(), false);
-        chassis.odom.Y_position = sensorFilter(frontDist, chassis.get_Y_position(), false);
+        chassis.odom.X_position = sensorFilter(rightDist, chassis.get_X_position(), false, force);
+        chassis.odom.Y_position = sensorFilter(frontDist, chassis.get_Y_position(), false, force);
       }
       else if(resetAngle == 1) { //90 deg
-        chassis.odom.X_position = sensorFilter(frontDist, chassis.get_X_position(), false);
-        chassis.odom.Y_position = sensorFilter(leftDist, chassis.get_Y_position(), false);
+        chassis.odom.X_position = sensorFilter(frontDist, chassis.get_X_position(), false, force);
+        chassis.odom.Y_position = sensorFilter(leftDist, chassis.get_Y_position(), false, force);
       }
       else if(resetAngle == 2) { //180 deg
-        chassis.odom.X_position = sensorFilter(leftDist, chassis.get_X_position(), false);
-        chassis.odom.Y_position = sensorFilter(backDist, chassis.get_Y_position(), false);
+        chassis.odom.X_position = sensorFilter(leftDist, chassis.get_X_position(), false, force);
+        chassis.odom.Y_position = sensorFilter(backDist, chassis.get_Y_position(), false, force);
       }
       else if(resetAngle == 3) { //270 deg
-        chassis.odom.X_position = sensorFilter(backDist, chassis.get_X_position(), false);
-        chassis.odom.Y_position = sensorFilter(rightDist, chassis.get_Y_position(), false);
+        chassis.odom.X_position = sensorFilter(backDist, chassis.get_X_position(), false, force);
+        chassis.odom.Y_position = sensorFilter(rightDist, chassis.get_Y_position(), false, force);
       }
       break;
     case 2:
       if(resetAngle == 0) { //0 deg
-        chassis.odom.X_position = sensorFilter(leftDist, chassis.get_X_position(), true);
-        chassis.odom.Y_position = sensorFilter(frontDist, chassis.get_Y_position(), false);
+        chassis.odom.X_position = sensorFilter(leftDist, chassis.get_X_position(), true, force);
+        chassis.odom.Y_position = sensorFilter(frontDist, chassis.get_Y_position(), false, force);
       }
       else if(resetAngle == 1) { //90 deg
-        chassis.odom.X_position = sensorFilter(backDist, chassis.get_X_position(), true);
-        chassis.odom.Y_position = sensorFilter(leftDist, chassis.get_Y_position(), false);
+        chassis.odom.X_position = sensorFilter(backDist, chassis.get_X_position(), true, force);
+        chassis.odom.Y_position = sensorFilter(leftDist, chassis.get_Y_position(), false, force);
       }
       else if(resetAngle == 2) { //180 deg
-        chassis.odom.X_position = sensorFilter(rightDist, chassis.get_X_position(), true);
-        chassis.odom.Y_position = sensorFilter(backDist, chassis.get_Y_position(), false);
+        chassis.odom.X_position = sensorFilter(rightDist, chassis.get_X_position(), true, force);
+        chassis.odom.Y_position = sensorFilter(backDist, chassis.get_Y_position(), false, force);
       }
       else if(resetAngle == 3) { //270 deg
-        chassis.odom.X_position = sensorFilter(frontDist, chassis.get_X_position(), true);
-        chassis.odom.Y_position = sensorFilter(rightDist, chassis.get_Y_position(), false);
+        chassis.odom.X_position = sensorFilter(frontDist, chassis.get_X_position(), true, force);
+        chassis.odom.Y_position = sensorFilter(rightDist, chassis.get_Y_position(), false, force);
       }
       break;
     case 3:
       if(resetAngle == 0) { //0 deg
-        chassis.odom.X_position = sensorFilter(leftDist, chassis.get_X_position(), true);
-        chassis.odom.Y_position = sensorFilter(backDist, chassis.get_Y_position(), true);
+        chassis.odom.X_position = sensorFilter(leftDist, chassis.get_X_position(), true, force);
+        chassis.odom.Y_position = sensorFilter(backDist, chassis.get_Y_position(), true, force);
       }
       else if(resetAngle == 1) { //90 deg
-        chassis.odom.X_position = sensorFilter(backDist, chassis.get_X_position(), true);
-        chassis.odom.Y_position = sensorFilter(rightDist, chassis.get_Y_position(), true);
+        chassis.odom.X_position = sensorFilter(backDist, chassis.get_X_position(), true, force);
+        chassis.odom.Y_position = sensorFilter(rightDist, chassis.get_Y_position(), true, force);
       }
       else if(resetAngle == 2) { //180 deg
-        chassis.odom.X_position = sensorFilter(rightDist, chassis.get_X_position(), true);
-        chassis.odom.Y_position = sensorFilter(frontDist, chassis.get_Y_position(), true);
+        chassis.odom.X_position = sensorFilter(rightDist, chassis.get_X_position(), true, force);
+        chassis.odom.Y_position = sensorFilter(frontDist, chassis.get_Y_position(), true, force);
       }
       else if(resetAngle == 3) { //270 deg
-        chassis.odom.X_position = sensorFilter(frontDist, chassis.get_X_position(), true);
-        chassis.odom.Y_position = sensorFilter(leftDist, chassis.get_Y_position(), true);
+        chassis.odom.X_position = sensorFilter(frontDist, chassis.get_X_position(), true, force);
+        chassis.odom.Y_position = sensorFilter(leftDist, chassis.get_Y_position(), true, force);
       }
       break;
     case 4:
       if(resetAngle == 0) { //0 deg
-        chassis.odom.X_position = sensorFilter(rightDist, chassis.get_X_position(), false);
-        chassis.odom.Y_position = sensorFilter(backDist, chassis.get_Y_position(), true);
+        chassis.odom.X_position = sensorFilter(rightDist, chassis.get_X_position(), false, force);
+        chassis.odom.Y_position = sensorFilter(backDist, chassis.get_Y_position(), true, force);
       }
       else if(resetAngle == 1) { //90 deg
-        chassis.odom.X_position = sensorFilter(frontDist, chassis.get_X_position(), false);
-        chassis.odom.Y_position = sensorFilter(rightDist, chassis.get_Y_position(), true);
+        chassis.odom.X_position = sensorFilter(frontDist, chassis.get_X_position(), false, force);
+        chassis.odom.Y_position = sensorFilter(rightDist, chassis.get_Y_position(), true, force);
       }
       else if(resetAngle == 2) { //180 deg
-        chassis.odom.X_position = sensorFilter(leftDist, chassis.get_X_position(), false);
-        chassis.odom.Y_position = sensorFilter(frontDist, chassis.get_Y_position(), true);
+        chassis.odom.X_position = sensorFilter(leftDist, chassis.get_X_position(), false, force);
+        chassis.odom.Y_position = sensorFilter(frontDist, chassis.get_Y_position(), true, force);
       }
       else if(resetAngle == 3) { //270 deg
-        chassis.odom.X_position = sensorFilter(backDist, chassis.get_X_position(), false);
-        chassis.odom.Y_position = sensorFilter(leftDist, chassis.get_Y_position(), true);
+        chassis.odom.X_position = sensorFilter(backDist, chassis.get_X_position(), false, force);
+        chassis.odom.Y_position = sensorFilter(leftDist, chassis.get_Y_position(), true, force);
       }
       break;
   }

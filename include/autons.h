@@ -27,5 +27,6 @@ void rightCenter(bool allColor);
 void rightSawp(bool allColor);
 void temp(bool allColor);
 void skills();
+void leftCounter7Ball(bool allColor);
 
 extern thread intakeThread;

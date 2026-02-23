@@ -12,17 +12,74 @@
  * exit conditions, check the docs.
  */
 
+ void printCoordinates() {
+   printf("X pos: %f \n Y pos: %f \n Heading: %f \n", chassis.get_X_position(), chassis.get_Y_position(), chassis.get_absolute_heading());
+ }
+
  thread intakeThread;
 
  void temp(bool allColor) {
-    // chassis.set_coordinates(0, 0, 0);
+    chassis.set_coordinates(-24, -24, 90);
+    distanceReset(0);
     // printf("Original Encoder: %f \n", chassis.get_ForwardTracker_position());
-    // chassis.drive_distance(72, 0, 8, 8, 2, 150, 2000);
+    // chassis.drive_distance(72, 0, 8, 8, 0.5, 150, 2000);
     // printf("X: %f \n", chassis.get_X_position());
     // printf("Y: %f \n", chassis.get_Y_position());
     // printf("Encoder: %f \n", chassis.get_ForwardTracker_position());
-    chassis.drive_distance_to_wall(frontDist, 24, 0, 9, 6, 3, 150, 2000);
+    // chassis.drive_distance_to_wall(frontDist, 48, 0, 9, 6, 3, 150, 3000);
     
+ }
+
+ void leftCounter7Ball(bool allColor) {
+  chassis.set_turn_exit_conditions(6, 75, 3000);
+
+  antler.open();
+  isAuto = true;
+  Brain.resetTimer();
+  while(chassis.Gyro.isCalibrating()) {
+    wait(20, msec);
+  }
+
+  chassis.set_coordinates(-48, 16, 90);
+  intakeThread = thread(autoIntake, &allColor);
+  distanceReset(0);
+  chassis.turn_to_point(-24, 24);
+  chassis.drive_to_point(-25, 22, 0, 2.5, 6, 3, 100, 2000);
+  chassis.turn_to_point(0, 0, 180);
+  matchload.open();
+  intakeMotors.spinFor(reverse, 160, deg, 500, rpm, false);
+  chassis.drive_to_point(-10, 8, 0, 3, 4, 0, 0, 1000);
+  while(Brain.timer(sec) < 5) {
+    wait(50, msec);
+  }
+  intakeThread.interrupt();
+  intakeScoreMid(60);
+  wait(1500, msec);
+  ramp.close();
+  matchload.close();
+  intakeMotors.stop();
+  chassis.set_coordinates(-11, 11, chassis.get_absolute_heading());
+  chassis.drive_to_point(-24, 32, 0, 4, 4, 2, 50, 2000);
+  chassis.turn_to_angle(70);
+  chassis.drive_distance(16, 80, 4, 2, 4, 0, 2000);
+  chassisMotors.stop();
+  while(Brain.timer(sec) < 10) {
+    wait(50, msec);
+  }
+  antler.close();
+  chassis.drive_to_point(-48, 48, 0, 8, 8, 6, 0, 2000);
+  matchload.open();
+  chassis.turn_to_angle(-90);
+  distanceReset(0);
+  chassis.drive_to_point(-60, 48, 0, 4, 2, 8, 0, 2000);
+  chassis.drive_to_point(-72, 48, 0, 3, 2, 0, 0, 900);
+  distanceReset(0);
+  chassis.drive_to_point(-24, 48, 0, 8, 1, 0, 0, 750);
+  intakeThread.interrupt();
+  intakeScoreTop(false, allColor);
+
+  
+
  }
 
   void rightSawp(bool allColor) {
@@ -38,13 +95,12 @@
   chassis.set_coordinates(-60, -12, 0);
   intakeStore(false);
   distanceReset(0);
-  chassis.drive_distance(10, 0, 6, 2, 2, 50, 450);
-  chassis.drive_to_point(-45, -48, 0, 8, 8, 4, 100, 2000);
+  chassis.drive_distance(12, 0, 6, 2, 2, 50, 450);
+  chassis.drive_to_point(-45, -48, 0, 8, 8, 4, 50, 2000);
   chassis.turn_to_point(-72, -48, 0, 9, 6, 50, 2000);
   matchload.open();
   distanceReset(0);
-  // chassis.drive_to_point(-60, -48, 0, 5, 2, 8, 0, 2000);
-  chassis.drive_to_point(-72, -48, 0, 3, 2, 0, 0, 1200);
+  chassis.drive_to_point(-72, -48, 0, 3.5, 2, 0, 0, 1100);
   distanceReset(0);
   chassis.drive_to_point(-24, -48, 0, 8, 1, 0, 0, 700);
   intakeScoreTop(false);
@@ -54,45 +110,56 @@
   wait(500, msec);
 
   intakeStore(false);
-  // chassis.turn_to_angle(15);
-  chassis.drive_to_point(-40, -48, 0, 8, 6, 6, 0, 2000);
+  // chassis.drive_to_point(-40, -48, 0, 8, 6, 6, 0, 2000);
   hoodMotor.spin(reverse, 50, pct);
+  // distanceReset(0);
+  // chassis.turn_to_point(-24, -24, 0, 9, 15, 0, 2000);
+  chassis.left_swing_to_angle(0, 9, 7, 0, 2000, chassis.swing_kp, chassis.swing_ki, chassis.swing_kd, chassis.swing_starti);
   distanceReset(0);
-  chassis.turn_to_point(-24, -24, 0, 9, 15, 0, 2000);
+  // printf("X: %f \n Y: %f \n Heading: %f \n", chassis.get_X_position(), chassis.get_Y_position(), chassis.get_absolute_heading());
   hoodMotor.stop();
-  chassis.drive_to_point(-20, -20, 0, 5, 4, 6, 0, 2000);
-  chassis.drive_to_point(-22, 26, 0, 6, 4, 4, 0, 2000);
+  // chassis.turn_to_point(-20, -20, 0, 9, 6, 0, 2000);
+  chassis.drive_to_point(-24, -24, 0, 7, 6, 6, 0, 2000);
+  // chassis.turn_to_point(-24, 24, 0, 9, 10, 0, 2000);
+  chassis.drive_to_point(-26, 24, 0, 8, 6, 11, 0, 2000);
   matchload.open();
-  chassis.turn_to_point(0, 0, 180);
-  chassis.turn_to_angle(-45);
-  // chassis.drive_to_point(-12, 12, 0, 6, 4, 8, 0, 1000);
-  chassis.drive_to_point(-6, 6, 0, 6, 4, 16.5, 0, 1000);
-  // intakeMotors.spinFor(reverse, 135, deg, 500, rpm);
-  intakeMotors.spin(reverse, 50, pct);
-  chassis.drive_to_point(0, 0, 0, 3, 2, 0, 0, 300);
-  // chassis.set_coordinates(-9, 9, chassis.get_absolute_heading());
-  matchload.open();
-  intakeThread.interrupt();
-  ramp.open();
-  intakeScoreMid(60);
-  hoodMotor.spin(reverse, 100, pct);
-  wait(1000, msec);
-  ramp.close();
-  // intakeMotors.stop();
+  
 
-  chassis.drive_to_point(-48, 48, 0, 8, 8, 4, 50, 2000);
+  chassis.drive_to_point(-48, 44, 0, 8, 10, 4, 50, 2000);
   hoodMotor.stop();
   intakeStore(false);
   chassis.turn_to_point(-72, 48);
   distanceReset(0);
-  // intakeThread = thread(autoIntake, &allColor);
-  intakeStore(false);
-  chassis.drive_to_point(-72, 48, 0, 4, 4, 0, 0, 1100);
-  chassis.drive_to_point(-24, 48, 0, 6, 4, 0, 0, 900);
+  chassis.drive_to_point(-24, 48, 0, 6, 8, 0, 0, 500);
   intakeThread.interrupt();
   intakeScoreTop(false);
   chassis.drive_distance(-10, -90, 3, 6, 0, 0, 500);
   distanceReset(0);
+  wait(900, msec);
+
+  // chassis.turn_to_point(-72, 48, 0, 9, 6, 0, 2000);
+  distanceReset(0);
+  // intakeThread = thread(autoIntake, &allColor);
+  chassis.drive_to_point(-60, 48, 0, 5, 4, 6, 0, 2000);
+  intakeStore(false);
+  chassis.drive_to_point(-72, 48, 0, 2.5, 4, 0, 0, 600);
+  distanceReset(0);
+  chassis.drive_to_point(-48, 48, 0, 8, 6, 6, 50, 2000);
+  distanceReset(0);
+  // chassis.turn_to_point(0, 0, 180, );
+  // chassis.drive_to_point(-12, 12, 0, 6, 4, 8, 0, 1000);
+  // intakeMotors.spin(reverse, 25, pct);
+  chassis.drive_to_point(-6, -2, 0, 7, 12, 18, 0, 2000);
+  // intakeMotors.spinFor(reverse, 135, deg, 500, rpm);
+  
+  // chassis.drive_to_point(0, -4, 0, 2, 2, 0, 0, 300);
+  // chassis.set_coordinates(-9, 9, chassis.get_absolute_heading());
+  // matchload.open();
+  intakeThread.interrupt();
+  ramp.open();
+  intakeScoreMid(60);
+  chassis.drive_to_point(0, 0, 0, 2, 2, 0, 0, 300);
+  hoodMotor.spin(reverse, 100, pct);
   wait(1000, msec);
 
  }
@@ -218,16 +285,17 @@
   chassis.set_coordinates(-48, -16, 90);
   intakeThread = thread(autoIntake, &allColor);
   distanceReset(0);
-  chassis.drive_to_point(-26, -24, 0, 8, 8, 10, 0, 2000);
+  chassis.drive_to_point(-26, -24, 0, 8, 8, 6, 0, 2000);
   matchload.open();
   wait(200, msec);
-  chassis.turn_to_point(-48, -48, 0, 9, 8, 0, 2000);
-  chassis.drive_to_point(-48, -48, 0, 8, 6, 6, 0, 2000);
+  chassis.turn_to_point(-46, -46, 0, 9, 8, 0, 2000);
+  chassis.drive_to_point(-46, -46, 0, 8, 6, 6, 0, 2000);
   chassis.turn_to_point(-72, -48);
   distanceReset(0);
-  chassis.drive_to_point(-60, -48, 0, 6, 2, 8, 0, 2000);
-  chassis.drive_to_point(-72, -48, 0, 3, 2, 0, 0, 900);
+  chassis.drive_to_point(-60, -48, 0, 6, 6, 8, 0, 2000);
+  chassis.drive_to_point(-72, -48, 0, 4, 4, 0, 0, 1000);
   distanceReset(0);
+  intakeMotors.spinFor(reverse, 40, deg, 500, rpm, false);
   chassis.drive_to_point(-24, -48, 0, 8, 1, 0, 0, 750);
   intakeThread.interrupt();
   intakeScoreTop(false, allColor);
@@ -295,15 +363,16 @@
   chassis.set_coordinates(-48, 16, 90);
   intakeThread = thread(autoIntake, &allColor);
   distanceReset(0);
-  chassis.drive_to_point(-26, 24, 0, 8, 8, 10, 0, 2000);
+  chassis.drive_to_point(-26, 24, 0, 8, 7, 8, 0, 2000);
   matchload.open();
   wait(200, msec);
   chassis.turn_to_point(-48, 48, 0, 9, 8, 0, 2000);
   chassis.drive_to_point(-48, 48, 0, 8, 6, 6, 0, 2000);
   chassis.turn_to_point(-72, 48);
   distanceReset(0);
-  chassis.drive_to_point(-60, 48, 0, 4, 2, 8, 0, 2000);
-  chassis.drive_to_point(-72, 48, 0, 3, 2, 0, 0, 900);
+  chassis.drive_to_point(-60, 48, 0, 4, 4, 8, 0, 2000);
+  chassis.drive_to_point(-72, 48, 0, 3.5, 3, 0, 0, 900);
+  intakeMotors.spinFor(reverse, 40, deg, 500, rpm, false);
   distanceReset(0);
   chassis.drive_to_point(-24, 48, 0, 8, 1, 0, 0, 750);
   intakeThread.interrupt();
@@ -336,9 +405,9 @@ void rightCenterLong(bool allColor) {
   distanceReset(0);
   chassis.drive_to_point(-48, -48, 0, 8, 6);
   matchload.open();
-  chassis.turn_to_point(-72, -48);
+  chassis.turn_to_point(-72, -48, 0, 9, 7, 0, 2000);
   distanceReset(0);
-  chassis.drive_to_point(-72, -48, 0, 4, 2, 0, 0, 1000);
+  chassis.drive_to_point(-72, -48, 0, 4, 2, 0, 0, 950);
   distanceReset(0);
   chassis.drive_to_point(-24, -48, 0, 6, 1, 0, 0, 750);
   intakeThread.interrupt();
@@ -349,28 +418,28 @@ void rightCenterLong(bool allColor) {
   wait(1000, msec);
   intakeThread.interrupt();
   intakeThread = thread(autoIntake, &allColor);
-  chassis.drive_to_point(-48, -48, 0, 8, 6, 3, 50, 2000);
+  chassis.drive_to_point(-48, -48, 0, 6, 6, 1.5, 100, 2000);
   distanceReset(0);
   chassis.turn_to_point(-24, -24, 0, 9, 3, 50, 2000);
 
   // intakeStore(true, allColor);
-  chassis.drive_to_point(-36, -36, 0, 6, 4, 8, 0, 2000);
-  chassis.drive_to_point(-22, -24, 0, 4, 4, 3, 200, 2000);
+  chassis.drive_to_point(-30, -29, 0, 6, 4, 14, 0, 2000);
+  chassis.drive_to_point(-24, -24, 0, 4, 4, 3, 200, 2000);
   // matchload.open();
   wait(750, msec);
   chassis.turn_to_point(0, 0);
   matchload.close();
-  chassis.drive_to_point(-10, -12, 0, 6, 6, 4, 0, 2000);
+  chassis.drive_to_point(-12, -11, 0, 6, 6, 4, 0, 2000);
+  chassis.drive_to_point(-4, -3, 0, 4, 2, 2, 50, 750);
+  chassis.turn_to_angle(45);
   intakeThread.interrupt();
   intakeMotors.stop();
-  chassis.drive_to_point(-4, -4, 0, 4, 2, 2, 50, 750);
-  chassis.turn_to_angle(45);
+  intakeMotors.spin(reverse, 30, pct);
   chassis.drive_distance(-2, 0, 2, 0, 1, 50, 2000);
-  intakeMotors.spin(reverse, 32, pct);
   wait(1400, msec);
-  chassis.drive_to_point(-24, -30);
+  chassis.drive_to_point(-26, -30);
   antler.close();
-  chassis.turn_to_angle(-65, 9, 6, 75, 2000);
+  chassis.turn_to_angle(-72, 9, 6, 75, 2000);
   chassis.drive_distance(-30, -90, 5, 1, 6, 0, 3000);
   chassis.turn_to_angle(-90, 5, 0, 0, 10000);
   chassisMotors.stop(hold);
@@ -391,9 +460,9 @@ void leftCenterLong(bool allColor) {
   distanceReset(0);
   chassis.drive_to_point(-48, 48, 0, 6, 6);
   matchload.open();
-  chassis.turn_to_point(-72, 48);
+  chassis.turn_to_point(-72, 48, 0, 9, 5, 0, 2000);
   distanceReset(0);
-  chassis.drive_to_point(-72, 48, 0, 3, 2, 0, 0, 1200);
+  chassis.drive_to_point(-80, 48, 0, 4, 2, 0, 0, 1100);
   distanceReset(0);
   chassis.drive_to_point(-24, 48, 0, 6, 1, 0, 0, 750);
   intakeThread.interrupt();
@@ -401,7 +470,7 @@ void leftCenterLong(bool allColor) {
   intakeThread = thread(autoScore, &allColor);
   matchload.close();
   distanceReset(0);
-  wait(1500, msec);
+  wait(1250, msec);
   intakeThread.interrupt();
   intakeThread = thread(autoIntake, &allColor);
   chassis.drive_to_point(-48, 48, 0, 8, 6, 3, 0, 2000);
@@ -410,19 +479,19 @@ void leftCenterLong(bool allColor) {
   chassis.turn_to_point(-24, 24);
 
   // intakeStore(true, allColor);
-  chassis.drive_to_point(-22, 22, 0, 4, 2, 3, 150, 2000);
-  matchload.open();
+  chassis.drive_to_point(-22, 22, 0, 4, 2, 3, 100, 2000);
+  // matchload.open();
   chassisMotors.stop();
   wait(500, msec);
   
   // chassis.turn_to_point(0, 0, 175);
   chassis.turn_to_angle(-45);
   
-  chassis.drive_to_point(-10, 12, 0, 6, 6, 2, 150, 2000);
-  chassis.drive_to_point(0, 0, 0, 3, 2, 2, 50, 750);
+  chassis.drive_to_point(-10, 12, 0, 6, 6, 2, 100, 2000);
+  chassis.drive_to_point(0, 0, 0, 3, 2, 2, 50, 500);
   intakeThread.interrupt();
   // intakeMotors.spin(reverse, 50, pct);
-  intakeMotors.spinFor(reverse, 135, deg, 500, rpm);
+  intakeMotors.spinFor(reverse, 135, deg, 500, rpm, false);
   chassis.drive_distance(-10, -45, 3, 6, 0, 0, 500);
   intakeScoreMid(65);
   wait(1500, msec);
@@ -430,7 +499,9 @@ void leftCenterLong(bool allColor) {
   chassis.drive_distance(14);
   midDescore.open();
   chassis.drive_distance(-14, chassis.get_absolute_heading(), 4, 2);
-  chassis.drive_distance(2);
+  // chassis.drive_distance(2);
+  chassis.drive_to_point(-24, 32);
+  chassis.turn_to_angle(75);
   
 }
 
@@ -446,21 +517,32 @@ void skills() {
   distanceReset(0);
 
   intakeStore(false);
-  chassis.drive_to_point(-24, 24, 0, 6, 6, 4, 200, 2000);
+  chassis.turn_to_point(-24, 24);
+  chassis.drive_to_point(-25, 23, 0, 2.5, 6, 3, 100, 2000);
   chassis.turn_to_point(0, 0, 180);
-  chassis.drive_to_point(-7, 7, 0, 3, 3, 0, 0, 1000);
-  intakeMotors.spinFor(reverse, 200, deg, 500, rpm);
+  matchload.open();
+  intakeMotors.spinFor(reverse, 160, deg, 500, rpm, false);
+  chassis.drive_to_point(-10, 8, 0, 3, 4, 0, 0, 1000);
+  printCoordinates();
   intakeScoreMid(53);
-  wait(1500, msec);
-  intakeMotors.spin(fwd, 100, pct);
-  chassis.drive_to_point(-48, 48, 0, 8, 6, 5, 200, 2000);
+  wait(1000, msec);
+  // intakeMotors.spin(fwd, 100, pct);
   ramp.close();
+  intakeMotors.spinFor(reverse, 200, deg, 500, rpm, false);
+  chassis.drive_to_point(-48, 48, 0, 8, 6, 5, 200, 2000);
+  intakeStore(false);
   chassis.turn_to_angle(-90);
   distanceReset(0);
+  chassis.drive_to_point(-24, 48, 0, 6, 2, 0, 0, 600);
+  intakeScoreTop(false);
+  chassis.drive_distance(-10, -90, 2, 10, 0, 0, 250);
+  chassisMotors.stop();
+  wait(500, msec);
+  chassis.drive_to_point(-60, 48, 0, 7, 6, 12, 0, 2000);
   intakeMotors.stop();
   matchload.open();
   intakeStore(false);
-  chassis.drive_to_point(-72, 48, 0, 3, 2, 0, 0, 2250);
+  chassis.drive_to_point(-72, 48, 0, 3, 2, 0, 0, 2001);
   // chassis.drive_distance(24, -90, 3, 1, 0, 0, 3000);
   chassis.drive_distance(-12);
   flapsMotor.spin(fwd, 100, pct);
@@ -468,18 +550,18 @@ void skills() {
   chassis.turn_to_angle(-150);
 
   //Going to other side
-  chassis.drive_to_point(0, 60, 0, 8, 2, 8, 0, 2000);
+  chassis.drive_to_point(24, 64, 0, 8, 2, 8, 0, 2000);
   distanceReset(0);
   matchload.close();
-  chassis.drive_to_point(40, 60);
+  chassis.drive_to_point(40, 48);
   // chassis.turn_to_angle(40); 
-  chassis.turn_to_angle(0);
-  distanceReset(0);
-  chassis.drive_to_point(45, 48, 0, 6, 6, 2, 150, 2000);
+  // chassis.turn_to_angle(0);
+  // distanceReset(0);
+  // chassis.drive_to_point(45, 48, 0, 6, 6, 2, 150, 2000);
   chassis.turn_to_angle(90);
   distanceReset(0);
-  chassis.drive_to_point(24, 48, 0, 6, 2, 0, 0, 750);
-  intakeMotors.spinFor(reverse, 40, deg, 500, rpm);
+  chassis.drive_to_point(24, 48, 0, 6, 2, 0, 0, 600);
+  intakeMotors.spinFor(reverse, 40, deg, 500, rpm, false);
   chassis.drive_distance(-10, 90, 2, 10, 0, 0, 250);
   intakeScoreTop(false);
   wait(1800, msec);
@@ -487,69 +569,80 @@ void skills() {
   distanceReset(0);
   intakeStore(false);
   chassis.drive_to_point(56, 48, 0, 5, 2, 8, 0, 2000);
-  chassis.drive_to_point(72, 48, 0, 3, 2, 0, 0, 2250);
+  chassis.drive_to_point(72, 48, 0, 3, 2, 0, 0, 2001);
+  intakeMotors.spinFor(reverse, 40, deg, 500, rpm, false);
   chassis.drive_to_point(24, 48, 0, 6, 1, 0, 0, 1200);
   intakeScoreTop(false);
   matchload.close();
   distanceReset(0);
   wait(2000, msec);
   chassis.drive_to_point(60, 32);
-  chassis.turn_to_angle(155);
+  chassis.turn_to_angle(150);
   bool allColor = false; 
   intakeStore(true, allColor);
-  chassis.drive_distance(70, 180, 6, 1, 5, 0, 2500); //5 volts //80
-  distanceReset(4);
-  chassis.drive_to_point(chassis.get_X_position(), -30);
+  chassis.drive_distance(16, 175, 7, 1, 4, 0, 2000);
+  chassis.drive_distance_to_wall(frontDist, 38, 175, 6.25, 1.5, 5, 0, 4000);
+  // chassis.drive_distance(70, 180, 6, 1, 5, 0, 2500); //5 volts //80
+  // distanceReset(4);
+  // chassis.drive_to_point(chassis.get_X_position(), -30);
   chassis.turn_to_angle(-90);
   chassis.drive_distance(3);
+  chassis.turn_to_angle(-90);
+  distanceReset(0, true);
+  chassis.drive_to_point(26, -18, 0, 5, 5, 2, 0, 2000); //28, -19
+  chassis.drive_to_point(30, -30);
+  chassis.turn_to_angle(0);
   distanceReset(0);
-  chassis.drive_to_point(26, -15); //28, -19
+  // chassis.drive_distance(-12);
   chassis.turn_to_point(0, 0, 180);
-  chassis.drive_to_point(5, -5, 0, 4, 4, 0, 0, 1500);
   intakeMotors.stop();
+  chassis.drive_to_point(8, -10, 0, 4, 6, 0, 0, 1500);
   chassisMotors.stop(coast);
   chassis.turn_to_angle(135);
   // chassis.drive_to_point(0, 0, 0, 2, 10, 0, 0, 500);
   matchload.open();
-  chassis.drive_distance(-16, 135, 1, 5, 0, 0, 750);
+  intakeMotors.spinFor(reverse, 160, deg, 500, rpm, false);
+  chassis.drive_distance(-16, 135, 2, 5, 0, 0, 750);
   // intakeMotors.spin(reverse, 90, pct);
-  intakeMotors.spinFor(reverse, 200, deg, 500, rpm);
   // wait(150, msec);
   //Score top mid
-  intakeScoreMid(53);
-  wait(3500, msec);
+  intakeScoreMid(60);
+  chassis.set_coordinates(11, -11, chassis.get_absolute_heading());
+  wait(2250, msec); //3000
+  flapsMotor.spin(fwd, 60, pct);
+  hoodMotor.spin(reverse, 60, pct);
+  wait(1000, msec);
   matchload.close();
   
   
   //Second half
   chassis.drive_to_point(48, -48, 0, 6, 6, 2, 200, 2000);
   ramp.close();
-
+  matchload.open();
   chassis.turn_to_angle(90);
   printf("First matchloader on other side \n \n \n \n \n ");
   distanceReset(0);
-  matchload.open();
   intakeStore(false);
   // chassis.drive_distance(72, 90, 3, 6, 0, 0, 2500);
-  chassis.drive_to_point(72, -48, 0, 3, 2, 0, 0, 2250);
+  chassis.drive_to_point(72, -48, 0, 3, 2, 0, 0, 2001);
   chassis.drive_distance(-12);
   flapsMotor.spin(fwd, 100, pct);
   distanceReset(0);
   chassis.turn_to_angle(30);
 
   //Going to other side
-  chassis.drive_to_point(0, -60, 0, 8, 2, 8, 0, 2000);
+  chassis.drive_to_point(-24, -64, 0, 8, 2, 8, 0, 2000);
   distanceReset(0);
   matchload.close();
-  chassis.drive_to_point(-40, -60);
-  chassis.turn_to_angle(180);
-  distanceReset(0);
-  chassis.drive_to_point(-45, -48, 0, 6, 6, 2, 150, 2000);
+  chassis.drive_to_point(-40, -48);
+  // chassis.turn_to_angle(180);
+  // distanceReset(0);
+  // chassis.drive_to_point(-45, -48, 0, 6, 6, 2, 150, 2000);
   chassis.turn_to_angle(-90);
   distanceReset(0);
   // chassis.turn_to_angle(-140); 
-  chassis.drive_to_point(-24, -48, 0, 6, 2, 0, 0, 750);
-  intakeMotors.spinFor(reverse, 40, deg, 500, rpm);
+  chassis.drive_to_point(-24, -48, 0, 6, 2, 0, 0, 600);
+  intakeMotors.spinFor(reverse, 40, deg, 500, rpm, false);
   chassis.drive_distance(-10, -90, 2, 10, 0, 0, 250);
 
   intakeScoreTop(false);
@@ -560,16 +653,18 @@ void skills() {
   chassis.turn_to_point(-72, -48);
   printf("Heading: %f", chassis.get_absolute_heading());
   chassis.drive_to_point(-56, -48, 0, 5, 2, 8, 0, 2000);
-  chassis.drive_to_point(-72, -48, 0, 3, 2, 0, 0, 2250);
+  chassis.drive_to_point(-72, -48, 0, 3, 2, 0, 0, 2001);
+  intakeMotors.spinFor(reverse, 40, deg, 500, rpm, false);
   chassis.drive_to_point(-24, -48, 0, 6, 1, 0, 0, 1200);
   intakeScoreTop(false);
   matchload.close();
   distanceReset(0);
   wait(2000, msec);
   intakeStore(false);
-  chassis.drive_to_point(-60, -36);
+  chassis.drive_to_point(-60, -34);
   chassis.turn_to_angle(-30);
-  chassis.drive_distance(50, 0, 6.5, 1, 5, 0, 3500);
+  chassis.drive_distance(50, -5, 7, 1.5, 5, 0, 3500);
+  // chassis.drive_distance_to_wall(frontDist, 72, 180, 6, 1, 5, 0, 4000);
   
 
 }
