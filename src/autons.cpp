@@ -18,15 +18,16 @@
 
  thread intakeThread;
 
+//Test function to tune wheel diameter and distance sensor offsets
  void temp(bool allColor) {
-    chassis.set_coordinates(-24, -24, 90);
-    distanceReset(0);
-    // printf("Original Encoder: %f \n", chassis.get_ForwardTracker_position());
-    // chassis.drive_distance(72, 0, 8, 8, 0.5, 150, 2000);
-    // printf("X: %f \n", chassis.get_X_position());
-    // printf("Y: %f \n", chassis.get_Y_position());
-    // printf("Encoder: %f \n", chassis.get_ForwardTracker_position());
-    // chassis.drive_distance_to_wall(frontDist, 48, 0, 9, 6, 3, 150, 3000);
+    chassis.set_coordinates(-24, -24, 90); //Place robot exactly at -24, -24, 90 deg
+    distanceReset(0); //Based on distance reset output, tune distance sensor offsets
+    printf("Original Encoder: %f \n", chassis.get_ForwardTracker_position());
+    chassis.drive_distance(72, 0, 8, 8, 0.5, 150, 2000); //Use this to tune wheel diameter. Overshoot --> increase diameter. Undershoot --> decrease
+    printf("X: %f \n", chassis.get_X_position()); //Final positions
+    printf("Y: %f \n", chassis.get_Y_position());
+    printf("Encoder: %f \n", chassis.get_ForwardTracker_position());
+    chassis.drive_distance_to_wall(frontDist, 48, 0, 9, 6, 3, 150, 3000); //Testing drive distance with sensor
     
  }
 
@@ -163,78 +164,6 @@
   wait(1000, msec);
 
  }
-
-//  void rightSawp(bool allColor) {
-
-//   chassis.set_turn_exit_conditions(6, 75, 3000); //Higher settle error to increase aggressiveness
-//   antler.open();
-//   isAuto = true;
-//   Brain.resetTimer();
-//   while(chassis.Gyro.isCalibrating()) {
-//       wait(20, msec);
-//   }
-
-//   chassis.set_coordinates(-60, -12, 0);
-//   intakeStore(false);
-//   distanceReset(0);
-//   chassis.drive_distance(10, 0, 6, 2, 2, 50, 450);
-//   chassis.drive_to_point(-45, -48, 0, 8, 8, 4, 100, 2000);
-//   chassis.turn_to_point(-72, -48, 0, 9, 6, 50, 2000);
-//   matchload.open();
-//   distanceReset(0);
-//   // chassis.drive_to_point(-60, -48, 0, 5, 2, 8, 0, 2000);
-//   chassis.drive_to_point(-72, -48, 0, 3, 2, 0, 0, 1200);
-//   distanceReset(0);
-//   chassis.drive_to_point(-24, -48, 0, 8, 1, 0, 0, 700);
-//   intakeScoreTop(false);
-//   chassis.drive_distance(-10, -90, 3, 6, 0, 0, 500);
-//   matchload.close();
-//   distanceReset(0);
-//   wait(500, msec);
-
-//   intakeStore(false);
-//   // chassis.turn_to_angle(15);
-//   chassis.drive_to_point(-40, -48, 0, 8, 6, 6, 0, 2000);
-//   hoodMotor.spin(reverse, 50, pct);
-//   distanceReset(0);
-//   chassis.turn_to_point(-24, -24, 0, 9, 15, 0, 2000);
-//   hoodMotor.stop();
-//   chassis.drive_to_point(-20, -20, 0, 5, 4, 6, 0, 2000);
-//   chassis.drive_to_point(-22, 26, 0, 6, 4, 4, 0, 2000);
-//   matchload.open();
-//   chassis.turn_to_point(0, 0, 180);
-//   chassis.turn_to_angle(-45);
-//   // chassis.drive_to_point(-12, 12, 0, 6, 4, 8, 0, 1000);
-//   chassis.drive_to_point(-6, 6, 0, 6, 4, 16.5, 0, 1000);
-//   // intakeMotors.spinFor(reverse, 135, deg, 500, rpm);
-//   intakeMotors.spin(reverse, 50, pct);
-//   chassis.drive_to_point(0, 0, 0, 3, 2, 0, 0, 300);
-//   // chassis.set_coordinates(-9, 9, chassis.get_absolute_heading());
-//   matchload.open();
-//   intakeThread.interrupt();
-//   ramp.open();
-//   intakeScoreMid(60);
-//   hoodMotor.spin(reverse, 100, pct);
-//   wait(1000, msec);
-//   ramp.close();
-//   // intakeMotors.stop();
-
-//   chassis.drive_to_point(-48, 48, 0, 8, 8, 4, 50, 2000);
-//   hoodMotor.stop();
-//   intakeStore(false);
-//   chassis.turn_to_point(-72, 48);
-//   distanceReset(0);
-//   // intakeThread = thread(autoIntake, &allColor);
-//   intakeStore(false);
-//   chassis.drive_to_point(-72, 48, 0, 4, 4, 0, 0, 1100);
-//   chassis.drive_to_point(-24, 48, 0, 6, 4, 0, 0, 900);
-//   intakeThread.interrupt();
-//   intakeScoreTop(false);
-//   chassis.drive_distance(-10, -90, 3, 6, 0, 0, 500);
-//   distanceReset(0);
-//   wait(1000, msec);
-
-//  }
 
  void right4Wing(bool allColor) {
   chassis.set_turn_exit_conditions(6, 50, 2000);
@@ -460,7 +389,7 @@ void leftCenterLong(bool allColor) {
   distanceReset(0);
   chassis.drive_to_point(-48, 48, 0, 6, 6);
   matchload.open();
-  chassis.turn_to_point(-72, 48, 0, 9, 5, 0, 2000);
+  chassis.turn_to_point(-72, 48, 0, 9, 5, 0, 2000); 
   distanceReset(0);
   chassis.drive_to_point(-80, 48, 0, 4, 2, 0, 0, 1100);
   distanceReset(0);

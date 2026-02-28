@@ -359,10 +359,12 @@ void Drive::drive_distance_to_wall(distance dist_sensor, float distance_from_wal
 }
 
 void Drive::drive_distance_to_wall(distance dist_sensor, float distance_from_wall, float heading, float drive_max_voltage, float heading_max_voltage, float drive_settle_error, float drive_settle_time, float drive_timeout, float drive_kp, float drive_ki, float drive_kd, float drive_starti, float heading_kp, float heading_ki, float heading_kd, float heading_starti) {
-  float drive_error = dist_sensor.objectDistance(inches) - distance_from_wall;
-  if(dist_sensor.objectDistance(inches) == 0) {
+  float drive_error = dist_sensor.objectDistance(inches) - distance_from_wall; //Calculating drive error based on sensor
+  //If the distance sensor reads nothing (either robot is too far from wall or tilted upwards), assumes the robot is very far from setpoint.
+  if(dist_sensor.objectDistance(inches) == 0) { 
     drive_error = 100;
   } 
+  //Sets up drive PID using calculated error
   PID drivePID(dist_sensor.objectDistance(inches) - distance_from_wall, drive_kp, drive_ki, drive_kd, drive_starti, drive_settle_error, drive_settle_time, drive_timeout);
   PID headingPID(reduce_negative_180_to_180(heading - get_absolute_heading()), heading_kp, heading_ki, heading_kd, heading_starti);
   float start_average_position = -dist_sensor.objectDistance(inches);

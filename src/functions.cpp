@@ -26,11 +26,12 @@ int autoScore(void *isBlue) {
 }
 
 void intakeStore(bool sort, bool isBlue) {
-  wrongTopBall = false;
+  wrongTopBall = false; //Boolean to prevent hood motor from excessively outtaking
 
   ramp.close();
   flapsMotor.spin(fwd, 100, pct);
 
+  //Checkes if the user wants to sort blocks
   if(!sort) {
     intakeCommand = false;
     hoodMotor.stop(hold);
@@ -43,8 +44,8 @@ void intakeStore(bool sort, bool isBlue) {
     ((isBlue && colorSorter.hue() > 0 && colorSorter.hue() < 50) ||
      (!isBlue && colorSorter.hue() > 100 && colorSorter.hue() < 240)));
 
-  if(wrongColor) {
-    intakeCommand = true;
+  if(wrongColor) { //If wrong color is detected, eject the ball
+    intakeCommand = true; //Temporarily halts user intake thread to perform ejection
     hoodMotor.spinFor(fwd, 180, deg, 600, rpm);
     intakeCommand = false;
   }
@@ -164,9 +165,10 @@ float sensorFilter(distance sensor, float odomValue, bool negative, bool force) 
   }
 }
 
-
+/*Resets the robot's odometry position using distance sensors. Takes the robot's quadrant of the field and whether the 
+reset should override corrections as arguments*/
 void distanceReset(int quadrant, bool force) {
-  if(quadrant == 0) { //auto-select quadrant
+  if(quadrant == 0) { //Automatically selects quadrant based on robot position
     if(chassis.get_X_position() > 0) {
       if(chassis.get_Y_position() > 0) {
         quadrant = 1;
@@ -193,11 +195,11 @@ void distanceReset(int quadrant, bool force) {
   printf("Actual heading: %f\n", chassis.get_absolute_heading());
 
   printf("Position updated from: X = %f, Y = %f\n", chassis.get_X_position(), chassis.get_Y_position());
-
+  //Using the robot's angle and quadrant, we know which sensors to use and which walls will be detected.
   switch (quadrant) {
     case 1:
-      if(resetAngle == 0) { //0 deg
-        chassis.odom.X_position = sensorFilter(rightDist, chassis.get_X_position(), false, force);
+      if(resetAngle == 0) { //0 Degrees
+        chassis.odom.X_position = sensorFilter(rightDist, chassis.get_X_position(), false, force); //Resets the robot's X position using a helper function
         chassis.odom.Y_position = sensorFilter(frontDist, chassis.get_Y_position(), false, force);
       }
       else if(resetAngle == 1) { //90 deg
