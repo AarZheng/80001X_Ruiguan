@@ -23,14 +23,16 @@ motor hoodMotor = motor(PORT19, true);
 motor_group intakeMotors = motor_group(flapsMotor, hoodMotor);
 
 pneumatics matchload = pneumatics(Brain.ThreeWirePort.D);
-pneumatics ramp = pneumatics(Brain.ThreeWirePort.A);
+pneumatics ramp = pneumatics(Brain.ThreeWirePort.E);
 pneumatics antler = pneumatics(Brain.ThreeWirePort.B);
 pneumatics midDescore = pneumatics(Brain.ThreeWirePort.C);
+pneumatics lowGoal = pneumatics(Brain.ThreeWirePort.A);
 
 bool matchloadActive = false;
 bool topScoring = true;
 bool antlerActive = false;
 bool midDescoreActive = false;
+bool lowGoalActive = false;
 
 optical colorSorter = optical(PORT14);
 distance rightDist = distance(PORT18); //6
@@ -41,5 +43,6 @@ distance leftDist = distance(PORT13);
 void vexcodeInit( void ) {
   colorSorter.setLightPower(100);
   colorSorter.integrationTime(15);
+  lowGoal.open();
   // colorSorter.objectDetectThreshold(10);
 }

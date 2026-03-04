@@ -22,6 +22,7 @@ extern pneumatics matchload;
 extern pneumatics ramp;
 extern pneumatics antler;
 extern pneumatics midDescore;
+extern pneumatics lowGoal;
 
 extern optical colorSorter;
 extern distance frontDist;

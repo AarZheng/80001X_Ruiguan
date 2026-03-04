@@ -226,7 +226,8 @@ void autonomous(void) {
       allColor = false;
       // // //Right mid
       // rightCenterLong(allColor);
-      leftCenterLong(allColor);      // right7Wing(allColor);
+      // leftCenterLong(allColor);
+      rightCounter7Ball(allColor);
       
       break;
     case 1:
@@ -322,6 +323,7 @@ void usercontrol(void) {
   antler.open();
   midDescore.close();
   matchload.close();
+  lowGoal.open();
   Controller.Screen.clearScreen();
   
   // Controller.ButtonUp.pressed([] {
@@ -350,6 +352,10 @@ void usercontrol(void) {
     intakeCommand = false;
     chassisControl = false;
     skillsRun = false;
+  });
+
+  Controller.ButtonDown.pressed([] {
+    lowGoal.close();
   });
 
   chassis.DriveR.setStopping(coast);
@@ -419,6 +425,7 @@ void usercontrol(void) {
     if(!intakeCommand) {
 
       if(Controller.ButtonR1.pressing()) {
+        lowGoal.open();
         ramp.close();
         if(Controller.ButtonR2.pressing()) {
           intakeMotors.stop();
