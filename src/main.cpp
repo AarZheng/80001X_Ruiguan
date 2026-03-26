@@ -70,9 +70,8 @@ motor_group(rightBack, rightMid, rightFront),
 PORT4,
 
 //Input your wheel diameter. (4" omnis are actually closer to 4.125"):
-
-// 3.35,
-3.3, //3.5
+// 3.3, 
+2.78,
 
 //External ratio, must be in decimal, in the format of input teeth/output teeth.
 //If your motor has an 84-tooth gear and your wheel has a 60-tooth gear, this value will be 1.4.
@@ -167,10 +166,10 @@ void pre_auton() {
         Brain.Screen.printAt(5, 140, "Red right SAWP");
         break;
       case 6:
-        Brain.Screen.printAt(5, 140, "Blue right 4 wing");
+        Brain.Screen.printAt(5, 140, "Blue right counter 7");
         break;
       case 7:
-        Brain.Screen.printAt(5, 140, "Red right 4 wing");
+        Brain.Screen.printAt(5, 140, "Red right counter 7");
         break;
       case 8:
         Brain.Screen.printAt(5, 140, "Blue right 7 wing");
@@ -179,19 +178,19 @@ void pre_auton() {
         Brain.Screen.printAt(5, 140, "Red right 7 wing");
         break;
       case 10:
-        Brain.Screen.printAt(5, 140, "Blue left 4 wing");
-        break;
-      case 11:
-        Brain.Screen.printAt(5, 140, "Red left 4 wing");
-        break;
-      case 12:
         Brain.Screen.printAt(5, 140, "Blue left 7 wing");
         break;
-      case 13:
+      case 11:
         Brain.Screen.printAt(5, 140, "Red left 7 wing");
         break; 
-      case 14:
+      case 12:
         Brain.Screen.printAt(5, 140, "Skills");
+        break;
+      case 13:
+        Brain.Screen.printAt(5, 140, "Delayed left wing");
+        break; 
+      case 14:
+        Brain.Screen.printAt(5, 140, "Delayed right wing");
         break;
     }
     // if(Brain.Screen.pressing()){
@@ -225,9 +224,10 @@ void autonomous(void) {
     case 0:
       allColor = false;
       // // //Right mid
-      // rightCenterLong(allColor);
-      // leftCenterLong(allColor);
-      rightCounter7Ball(allColor);
+      left7Wing(allColor);
+      // temp(allColor);
+
+      // skills();
       
       break;
     case 1:
@@ -255,11 +255,11 @@ void autonomous(void) {
     case 6:
       allColor = true;
       // right hold
-      right4Wing(allColor);
+      rightCounter7Ball(allColor);
       break;
     case 7:
       allColor = false;
-      right4Wing(allColor);
+      rightCounter7Ball(allColor);
       break;
     case 8:
       allColor = true;
@@ -272,27 +272,23 @@ void autonomous(void) {
       break;
     case 10:
       allColor = true;
-      //left hold
-      left4Wing(allColor);
-      break;
-    case 11:
-      allColor = false;
-      left4Wing(allColor);
-      break;
-    case 12:
-      allColor = true;
       //left wing
       left7Wing(allColor);
       break;
-    case 13:
+    case 11:
       allColor = false;
       left7Wing(allColor);
       break;
     
-    case 14:
+    case 12:
       allColor = true;
       skills();
       break;
+
+    case 13:
+      delayedLeft7Wing(false);
+    case 14:
+      delayedRight7Wing(false);
  }
 }
 
@@ -323,7 +319,7 @@ void usercontrol(void) {
   antler.open();
   midDescore.close();
   matchload.close();
-  lowGoal.open();
+  lowGoal.close();
   Controller.Screen.clearScreen();
   
   // Controller.ButtonUp.pressed([] {
@@ -355,7 +351,7 @@ void usercontrol(void) {
   });
 
   Controller.ButtonDown.pressed([] {
-    lowGoal.close();
+    
   });
 
   chassis.DriveR.setStopping(coast);
@@ -399,6 +395,18 @@ void usercontrol(void) {
     // intakeCommand = false;
   });
 
+  Controller.ButtonR2.pressed([] {
+    double time = Brain.timer(msec);
+    while(Brain.timer(msec) - time < 25) {
+      if(Controller.ButtonR1.pressing()) {
+        return;
+      }
+      wait(20, msec);
+    }
+    lowGoal.open();
+
+  });
+
 
   Controller.Screen.setCursor(1, 1);
   Controller.Screen.clearLine();
@@ -425,14 +433,14 @@ void usercontrol(void) {
     if(!intakeCommand) {
 
       if(Controller.ButtonR1.pressing()) {
-        lowGoal.open();
+        hood.close();
+        lowGoal.close();
         ramp.close();
         if(Controller.ButtonR2.pressing()) {
           intakeMotors.stop();
           antler.close();
         }
         else {
-          hoodMotor.stop();
           intakeStore(useSensors, allColor);
         }
       }
@@ -445,13 +453,15 @@ void usercontrol(void) {
           intakeMotors.spin(reverse, 30, pct);
         }
         else {
-          intakeMotors.spin(reverse, 100, pct);
+          intakeMotors.spin(reverse, 80, pct);
         }
         
       }
       else if(Controller.ButtonL1.pressing()) {
         //Score in top
+        lowGoal.close();
         ramp.close();
+        hood.open();
       
         chassis.DriveR.setStopping(hold);
         chassis.DriveL.setStopping(hold);
@@ -464,6 +474,7 @@ void usercontrol(void) {
       }
       else if(Controller.ButtonL2.pressing()) {
         //Score in middle
+        lowGoal.close();
         chassis.DriveR.setStopping(hold);
         chassis.DriveL.setStopping(hold);
         if(intakeCommand) {
@@ -474,12 +485,12 @@ void usercontrol(void) {
           hoodMotor.spin(reverse, 60, pct);
         }
         else {
-          intakeScoreMid(60);
+          intakeScoreMid(70);
         }
         
       }
       else {
-        intakeMotors.stop();
+        intakeMotors.stop(coast);
         chassis.DriveR.setStopping(coast);
         chassis.DriveL.setStopping(coast);
         antler.open();

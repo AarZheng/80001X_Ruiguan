@@ -34,7 +34,7 @@ void intakeStore(bool sort, bool isBlue) {
   //Checkes if the user wants to sort blocks
   if(!sort) {
     intakeCommand = false;
-    hoodMotor.stop(hold);
+    hoodMotor.stop();
     return;
   }
 
@@ -50,7 +50,7 @@ void intakeStore(bool sort, bool isBlue) {
     intakeCommand = false;
   }
   else {
-    hoodMotor.stop(hold);
+    hoodMotor.stop();
   }
 }
 

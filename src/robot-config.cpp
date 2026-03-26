@@ -9,16 +9,16 @@ brain  Brain;
 controller Controller;
 
 motor leftBack = motor(PORT12, ratio6_1, true);
-motor leftMid = motor(PORT1, ratio18_1, true);
+motor leftMid = motor(PORT1, ratio6_1, true);
 motor leftFront = motor(PORT3, ratio6_1, true);
 motor rightBack = motor(PORT20, ratio6_1, false); 
-motor rightMid = motor(PORT10, ratio18_1, false);
+motor rightMid = motor(PORT10, ratio6_1, false);
 motor rightFront = motor(PORT9, ratio6_1, false);
 
 motor_group chassisMotors = motor_group(leftBack, leftMid, leftFront, rightBack, rightMid, rightFront);
 
-motor flapsMotor = motor(PORT2, true);
-motor hoodMotor = motor(PORT19, true);
+motor flapsMotor = motor(PORT2, ratio6_1, true);
+motor hoodMotor = motor(PORT19, ratio6_1, true);
 
 motor_group intakeMotors = motor_group(flapsMotor, hoodMotor);
 
@@ -27,6 +27,7 @@ pneumatics ramp = pneumatics(Brain.ThreeWirePort.E);
 pneumatics antler = pneumatics(Brain.ThreeWirePort.B);
 pneumatics midDescore = pneumatics(Brain.ThreeWirePort.C);
 pneumatics lowGoal = pneumatics(Brain.ThreeWirePort.A);
+pneumatics hood = pneumatics(Brain.ThreeWirePort.F);
 
 bool matchloadActive = false;
 bool topScoring = true;
@@ -43,6 +44,6 @@ distance leftDist = distance(PORT13);
 void vexcodeInit( void ) {
   colorSorter.setLightPower(100);
   colorSorter.integrationTime(15);
-  lowGoal.open();
+  lowGoal.close();
   // colorSorter.objectDetectThreshold(10);
 }

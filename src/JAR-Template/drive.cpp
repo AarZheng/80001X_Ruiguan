@@ -381,7 +381,6 @@ void Drive::drive_distance_to_wall(distance dist_sensor, float distance_from_wal
 
     drive_output = clamp(drive_output, -drive_max_voltage, drive_max_voltage);
     heading_output = clamp(heading_output, -heading_max_voltage, heading_max_voltage);
-
     drive_with_voltage(drive_output+heading_output, drive_output-heading_output);
     task::sleep(10);
   }

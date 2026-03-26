@@ -20,6 +20,8 @@ void left4Wing(bool allColor);
 void right4Wing(bool allColor);
 void left7Wing(bool allColor);
 void right7Wing(bool allColor);
+void delayedRight7Wing(bool allColor);
+void delayedLeft7Wing(bool allColor);
 void leftCenterLong(bool allColor);
 void rightCenterLong(bool allColor);
 void leftCenter(bool allColor);

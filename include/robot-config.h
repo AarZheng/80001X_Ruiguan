@@ -23,6 +23,7 @@ extern pneumatics ramp;
 extern pneumatics antler;
 extern pneumatics midDescore;
 extern pneumatics lowGoal;
+extern pneumatics hood;
 
 extern optical colorSorter;
 extern distance frontDist;
