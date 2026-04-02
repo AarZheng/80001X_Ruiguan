@@ -224,7 +224,8 @@ void autonomous(void) {
     case 0:
       allColor = false;
       // // //Right mid
-      left7Wing(allColor);
+      // rightCenterLong(allColor);
+      leftCounter7Ball(allColor);
       // temp(allColor);
 
       // skills();
