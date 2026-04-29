@@ -148,49 +148,37 @@ void pre_auton() {
     Brain.Screen.printAt(5, 120, "Selected Auton:");
     switch(current_auton_selection){
       case 0:
-        Brain.Screen.printAt(5, 140, "Blue right mid");
+        Brain.Screen.printAt(5, 140, "Default");
         break;
       case 1:
-        Brain.Screen.printAt(5, 140, "Red right mid");
+        Brain.Screen.printAt(5, 140, "Right mid");
         break;
       case 2:
-        Brain.Screen.printAt(5, 140, "Blue left mid ");
+        Brain.Screen.printAt(5, 140, "Left mid");
         break;
       case 3:
-        Brain.Screen.printAt(5, 140, "Red left mid");
+        Brain.Screen.printAt(5, 140, "Right SAWP");
         break;
       case 4:
-        Brain.Screen.printAt(5, 140, "Blue right SAWP");
+        Brain.Screen.printAt(5, 140, "Right wing");
         break;
       case 5:
-        Brain.Screen.printAt(5, 140, "Red right SAWP");
+        Brain.Screen.printAt(5, 140, "Left wing");
         break;
       case 6:
-        Brain.Screen.printAt(5, 140, "Blue right counter 7");
+        Brain.Screen.printAt(5, 140, "Right counter 7");
         break;
       case 7:
-        Brain.Screen.printAt(5, 140, "Red right counter 7");
+        Brain.Screen.printAt(5, 140, "Left counter 7");
         break;
       case 8:
-        Brain.Screen.printAt(5, 140, "Blue right 7 wing");
+        Brain.Screen.printAt(5, 140, "Delayed right wing");
         break;
       case 9:
-        Brain.Screen.printAt(5, 140, "Red right 7 wing");
+        Brain.Screen.printAt(5, 140, "Delayed left wing");
         break;
       case 10:
-        Brain.Screen.printAt(5, 140, "Blue left 7 wing");
-        break;
-      case 11:
-        Brain.Screen.printAt(5, 140, "Red left 7 wing");
-        break; 
-      case 12:
         Brain.Screen.printAt(5, 140, "Skills");
-        break;
-      case 13:
-        Brain.Screen.printAt(5, 140, "Delayed left wing");
-        break; 
-      case 14:
-        Brain.Screen.printAt(5, 140, "Delayed right wing");
         break;
     }
     // if(Brain.Screen.pressing()){
@@ -202,7 +190,7 @@ void pre_auton() {
     if(Controller.ButtonA.pressing() || Brain.Screen.pressing()){
       while(Controller.ButtonA.pressing() || Brain.Screen.pressing()) {}
       current_auton_selection ++;
-    } else if (current_auton_selection == 15) {
+    } else if (current_auton_selection == 10) {
       current_auton_selection = 0;
     }
     task::sleep(10);
@@ -222,74 +210,38 @@ void autonomous(void) {
   auto_started = true;
   switch(current_auton_selection){ 
     case 0:
-      allColor = false;
-      // // //Right mid
-      // rightCenterLong(allColor);
-      leftCounter7Ball(allColor);
-      // temp(allColor);
-
-      // skills();
-      
+      leftCounter7Ball();
       break;
     case 1:
-      allColor = false;
-      rightCenterLong(allColor);
+      rightCenterLong();
       break;
     case 2:
-      allColor = true;
-      //left mid
-      leftCenterLong(allColor);
+      leftCenterLong();
       break;
     case 3:
-      allColor = false;
-      leftCenterLong(allColor);
+      rightSawp();
       break;
     case 4:
-      allColor = true;
-      //right sawp
-      rightSawp(allColor);
+      right7Wing();
       break;
     case 5:
-      allColor = false;
-      rightSawp(allColor);
+      left7Wing();
       break;
     case 6:
-      allColor = true;
-      // right hold
-      rightCounter7Ball(allColor);
+      rightCounter7Ball();
       break;
     case 7:
-      allColor = false;
-      rightCounter7Ball(allColor);
+      leftCounter7Ball();
       break;
     case 8:
-      allColor = true;
-      //right wing
-      right7Wing(allColor);
+      delayedRight7Wing();
       break;
     case 9:
-      allColor = false;
-      right7Wing(allColor);
+      delayedLeft7Wing();
       break;
     case 10:
-      allColor = true;
-      //left wing
-      left7Wing(allColor);
-      break;
-    case 11:
-      allColor = false;
-      left7Wing(allColor);
-      break;
-    
-    case 12:
-      allColor = true;
       skills();
       break;
-
-    case 13:
-      delayedLeft7Wing(false);
-    case 14:
-      delayedRight7Wing(false);
  }
 }
 
@@ -322,18 +274,7 @@ void usercontrol(void) {
   matchload.close();
   lowGoal.close();
   Controller.Screen.clearScreen();
-  
-  // Controller.ButtonUp.pressed([] {
-  //   if(skillsRun) {
-  //     if(skills_macro.load()) {
-  //       skillsTask.stop();
-  //     }
-  //     else if(!skills_macro.load()) {
-  //       skillsTask = task(auto_skills_in_driver);
-  //     }
-  //     skills_macro = !skills_macro;
-  //   }
-  // });
+
 
   Controller.ButtonUp.pressed([] {
     if(skillsRun) {
@@ -343,17 +284,6 @@ void usercontrol(void) {
     }
   });
 
-  Controller.ButtonR1.pressed([] {
-    printf("Emergency stop \n");
-    skillsTask.interrupt();
-    intakeCommand = false;
-    chassisControl = false;
-    skillsRun = false;
-  });
-
-  Controller.ButtonDown.pressed([] {
-    
-  });
 
   chassis.DriveR.setStopping(coast);
   chassis.DriveL.setStopping(coast);
@@ -408,6 +338,10 @@ void usercontrol(void) {
 
   });
 
+  Controller.ButtonL1.released([] {
+    hoodMotor.spinFor(reverse, 200, msec, 600, rpm);
+  });
+
 
   Controller.Screen.setCursor(1, 1);
   Controller.Screen.clearLine();
@@ -435,8 +369,8 @@ void usercontrol(void) {
 
       if(Controller.ButtonR1.pressing()) {
         hood.close();
+        midDescore.close();
         lowGoal.close();
-        ramp.close();
         if(Controller.ButtonR2.pressing()) {
           intakeMotors.stop();
           antler.close();
@@ -495,7 +429,7 @@ void usercontrol(void) {
         chassis.DriveR.setStopping(coast);
         chassis.DriveL.setStopping(coast);
         antler.open();
-        // midDescore.close();
+        ramp.close();
       }
 
       if(Controller.ButtonY.pressing()) {
@@ -506,13 +440,6 @@ void usercontrol(void) {
         matchload.close();
       }
 
-      if(Controller.ButtonRight.pressing()) {
-        midDescore.open();
-        matchload.close();
-      }
-      else {
-        midDescore.close();
-      }
     }
 
     if(!chassisControl) {

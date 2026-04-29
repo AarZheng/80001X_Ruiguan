@@ -109,8 +109,8 @@ void intakeScoreTop(bool isBlue) {
 
 void intakeScoreMid(double speed) {
   ramp.open();
+  midDescore.open();
   flapsMotor.spin(fwd, speed, pct);
-  // hoodMotor.stop(hold);
   hoodMotor.spin(reverse, 100, pct);
   // hoodMotor.spin(reverse, 60, pct);
 }
@@ -160,7 +160,7 @@ float sensorFilter(distance sensor, float odomValue, bool negative, bool force) 
   }
   else {
     printf("ERROR: Distance failed \n");
-    printf("Sensor installed: %s\n", sensor.installed() ? "true" : "false");
+    printf("Sensor installed: %s\n \n", sensor.installed() ? "true" : "false");
     return odomValue;
   }
 }

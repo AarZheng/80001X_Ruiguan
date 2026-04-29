@@ -38,7 +38,7 @@ bool lowGoalActive = false;
 optical colorSorter = optical(PORT14);
 distance rightDist = distance(PORT18); //6
 distance backDist = distance(PORT17); //4
-distance frontDist = distance(PORT8); //2
+distance frontDist = distance(PORT16); //2
 distance leftDist = distance(PORT13);
 
 void vexcodeInit( void ) {
